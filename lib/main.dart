@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'loginscreen.dart';
 import 'models/authentication.dart';
 
@@ -18,6 +19,8 @@ void main() async{
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var email = prefs.getString('email');
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: Authentication())
@@ -29,9 +32,9 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: MyHomePage(
+        home: email == null ? LoginScreen() : MyHomePage(
           title: 'Finance Login Screen'
-          ),
+        ),
         routes: {
           LoginScreen.routeName:(ctx) => LoginScreen(),
           SignupScreen.routeName:(ctx) => SignupScreen(),
@@ -60,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final Color primaryColor = Color(0xff18203d);
   final Color secondaryColor = Color(0xff232c51);
-  final Color logoGreen = Color(0xFF311B92);
+  final Color logoGreen = Color(0xFF7C4DFF);
 
   @override
   Widget build(BuildContext context) {

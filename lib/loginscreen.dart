@@ -13,6 +13,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  bool passwordVisible = true;
   final GlobalKey<FormState>_formKey = GlobalKey();
 
   Map<String,String> _authData = {
@@ -51,8 +52,18 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       Navigator.of(context).pushReplacementNamed(FinanceScreen.routeName);
     }catch(error){
-      var errorMessage = 'Authentication Failed. Please try later.';
-      _showErrorDialog(errorMessage);
+      switch(error.toString()){
+   case 'PlatformException(ERROR_NETWORK_REQUEST_FAILED, A network error (such as timeout, interrupted connection or unreachable host) has occurred., null)':
+       var val= "Check your connection!";
+       _showErrorDialog(val);
+       break;
+    case 'PlatformException(ERROR_EMAIL_ALREADY_IN_USE, The email address is already in use by another account., null)':  
+       var val="User already registered!";
+       _showErrorDialog(val);
+       break;
+    default: var val= "Something went wrong!";
+      _showErrorDialog(val);
+      };
     }
     
   }
@@ -103,10 +114,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       keyboardType:TextInputType.emailAddress,
                       decoration: InputDecoration(
                         contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                        labelText: 'Username',
+                        labelText: 'Email',
+                        hintText: "Email",
                         labelStyle: TextStyle(color: Colors.white),
-                          icon: Icon(
-                          Icons.account_circle,
+                          prefixIcon: Icon(
+                          Icons.email,
                           color: Colors.white,
                         ),
                       // prefix: Icon(icon),
@@ -135,11 +147,21 @@ class _LoginScreenState extends State<LoginScreen> {
               decoration: InputDecoration(
               contentPadding: EdgeInsets.symmetric(horizontal: 10),
               labelText: 'Password',
+              hintText: 'Password',
               labelStyle: TextStyle(color: Colors.white),
-              icon: Icon(
-                    Icons.lock,
+              suffixIcon: IconButton(
+                icon: Icon(
+                  passwordVisible
+                    ? Icons.visibility_off
+                    : Icons.visibility,
                     color: Colors.white,
-              ),
+                  ),
+                  onPressed: () {
+                     setState(() {
+                      passwordVisible = !passwordVisible;
+                     });
+                    },
+                  ),
               // prefix: Icon(icon),
               border: OutlineInputBorder(
                 borderSide: BorderSide(

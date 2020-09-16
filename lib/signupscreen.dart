@@ -7,6 +7,7 @@ import 'main.dart';
 import 'package:provider/provider.dart';
 import 'models/authentication.dart';
 import 'financescreen.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 
 class SignupScreen extends StatefulWidget {
@@ -16,7 +17,11 @@ class SignupScreen extends StatefulWidget {
   _SignupScreenState createState() => _SignupScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMixin {
+  bool passwordVisible = true;
+  bool pass = true;
+  String confirm,name;
+
   final GlobalKey<FormState>_formKey = GlobalKey();
 
   Map<String,String> _authData = {
@@ -54,12 +59,56 @@ class _SignupScreenState extends State<SignupScreen> {
       _authData['email'],
       _authData['password'],
     );
-
-    Navigator.of(context).pushReplacementNamed(FinanceScreen.routeName);
+    Alert(
+      context: context,
+      type: AlertType.success,
+      title: "SUCCESS",
+      style:AlertStyle(
+        backgroundColor: Theme.of(context).cardColor,
+      animationType: AnimationType.fromTop,
+      isCloseButton: false,
+      isOverlayTapDismiss: false,
+      descStyle: TextStyle(fontFamily:'Zilla Slab',fontSize: 18),
+      animationDuration: Duration(milliseconds: 400),
+      alertBorder: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(0.0),
+        side: BorderSide(
+         // color: Colors.grey,
+        ),
+      ),
+      titleStyle: TextStyle(fontFamily:'Zilla Slab',
+        fontWeight: FontWeight.bold,
+       color: Theme.of(context).textSelectionColor
+      ),
+    ),
+            desc: "Registered Successfully!",
+            buttons: [
+              DialogButton(
+                color: Color(0xff3671a4),
+                child: Text(
+                  "OK",
+                  style: TextStyle(fontFamily:'Zilla Slab',fontSize: 20,color: Colors.white),
+                ),
+                onPressed: () => Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => FinanceScreen()),
+        (Route<dynamic> route) => false)
+              )
+            ],
+          ).show();
     
     }catch(error){
-       var errorMessage = 'Authentication Failed. Please try later.';
-      _showErrorDialog(errorMessage);
+      switch(error.toString()){
+   case 'PlatformException(ERROR_NETWORK_REQUEST_FAILED, A network error (such as timeout, interrupted connection or unreachable host) has occurred., null)':
+       var val= "Check your connection!";
+       _showErrorDialog(val);
+       break;
+    case 'PlatformException(ERROR_EMAIL_ALREADY_IN_USE, The email address is already in use by another account., null)':  
+       var val="User already registered!";
+       _showErrorDialog(val);
+       break;
+    default: var val= "Something went wrong!";
+              _showErrorDialog(val);
+      }
     }
   }
 
@@ -104,7 +153,6 @@ class _SignupScreenState extends State<SignupScreen> {
           child: Column(
             children: <Widget>[
               TextFormField(
-              controller: nameController,
               style: TextStyle(color: Colors.white),
               keyboardType:TextInputType.emailAddress,
               decoration: InputDecoration(
@@ -114,9 +162,41 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                   contentPadding: EdgeInsets.symmetric(horizontal: 10),
                   labelText: 'Username',
+                  hintText: "Username",
                   labelStyle: TextStyle(color: Colors.white),
-                  icon: Icon(
+                  prefixIcon: Icon(
                     Icons.account_circle,
+                    color: Colors.white,
+                  ),
+                  // prefix: Icon(icon),
+                  
+                  ),
+                  validator: (value){
+                    if(value.isEmpty ){
+                      return 'invalid name';
+                    }
+                    return null;
+                  },
+                onSaved: (value){
+                  name = value;
+                },
+        ),
+        SizedBox(height:30),
+              TextFormField(
+              controller: nameController,
+              style: TextStyle(color: Colors.white),
+              keyboardType:TextInputType.emailAddress,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: secondaryColor),
+                ),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                  labelText: 'Email',
+                  hintText: "Email",
+                  labelStyle: TextStyle(color: Colors.white),
+                  prefixIcon: Icon(
+                    Icons.email,
                     color: Colors.white,
                   ),
                   // prefix: Icon(icon),
@@ -137,15 +217,26 @@ class _SignupScreenState extends State<SignupScreen> {
           controller: passwordController,
           style: TextStyle(color: Colors.white),
           keyboardType:TextInputType.emailAddress,
+           obscureText: passwordVisible,
           decoration: InputDecoration(
               contentPadding: EdgeInsets.symmetric(horizontal: 10),
               labelText: 'Password',
+              hintText: 'Password',
               labelStyle: TextStyle(color: Colors.white),
-              icon: Icon(
-                Icons.lock,
-                color: Colors.white,
-              ),
-              // prefix: Icon(icon),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  passwordVisible
+                    ? Icons.visibility_off
+                    : Icons.visibility,
+                    color: Colors.white,
+                  ),
+                   onPressed: () {
+                     setState(() {
+                      passwordVisible = !passwordVisible;
+                     });
+                    },
+                  ),
+              
               border: OutlineInputBorder(
                 borderSide: BorderSide(
                   color: secondaryColor),
@@ -163,18 +254,28 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
           SizedBox(height:30),
         TextFormField(
-          controller: passwordController,
+          //controller: passwordController,
           style: TextStyle(color: Colors.white),
           keyboardType:TextInputType.emailAddress,
+          obscureText: pass,
           decoration: InputDecoration(
               contentPadding: EdgeInsets.symmetric(horizontal: 10),
               labelText: 'Confirm Password',
+              hintText: 'ConfirmPassword',
               labelStyle: TextStyle(color: Colors.white),
-              icon: Icon(
-                Icons.lock,
-                color: Colors.white,
-              ),
-              // prefix: Icon(icon),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  pass
+                    ? Icons.visibility_off
+                    : Icons.visibility,
+                  color: Colors.white,
+                  ),
+                   onPressed: () {
+                     setState(() {
+                      pass = !pass;
+                     });
+                    },
+                  ),
               border: OutlineInputBorder(
                 borderSide: BorderSide(
                   color: secondaryColor),
@@ -182,14 +283,14 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
               validator: (value){
                 if(value.isEmpty || value!= passwordController.text){
-                  return 'invalid password';
+                  return 'invalid Password';
                 }
                 return null;
               },
               onSaved: (value){
-
+                confirm = value;
               },
-        ),
+            ),
             ],
           ),
       ),
@@ -204,6 +305,15 @@ class _SignupScreenState extends State<SignupScreen> {
                   minWidth: double.maxFinite,
                   height: 50,
                   onPressed: () {
+                  //  if(_authData['password'].compareTo(confirm)!=0){
+                    //  _scaffoldKey.currentState.showSnackBar(
+                    //    SnackBar(
+                    //      content: Text("Entered Password's don't match.",
+                    //      textAlign: TextAlign.center),
+                    //      backgroundColor: Colors.black,
+                    //      duration: Duration(seconds: 3),
+                    //    ));
+                   // }
                     _signup();
                   },
                   color: logoGreen,
