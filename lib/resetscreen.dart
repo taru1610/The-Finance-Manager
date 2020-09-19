@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'loginscreen.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   Future sendPasswordResetEmail(String email) async{
@@ -20,16 +20,6 @@ class ResetScreenState extends State<ResetScreen> {
 
   final GlobalKey<FormState>_formKey = GlobalKey();
   String email;
-
-void _showFlushBar(String msg){
-  Flushbar(
-    message: msg,
-    duration: Duration(seconds: 3),
-    flushbarPosition: FlushbarPosition.BOTTOM,
-    flushbarStyle: FlushbarStyle.GROUNDED,
-  );
-}
-
 void _showErrorDialog(String msg){
     showDialog(
       context: context,
@@ -57,9 +47,43 @@ void _showErrorDialog(String msg){
 
     try{
       await sendPasswordResetEmail(email);
-      var warning = 'Password Reset link Sent to $email';
-      _showFlushBar(warning);
-      Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
+      
+    Alert(
+      context: context,
+      type: AlertType.success,
+      title: "SUCCESS",
+      style:AlertStyle(
+        backgroundColor: Theme.of(context).cardColor,
+      animationType: AnimationType.fromTop,
+      isCloseButton: false,
+      isOverlayTapDismiss: false,
+      descStyle: TextStyle(fontFamily:'Zilla Slab',fontSize: 18),
+      animationDuration: Duration(milliseconds: 400),
+      alertBorder: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(0.0),
+        side: BorderSide(
+         // color: Colors.grey,
+        ),
+      ),
+      titleStyle: TextStyle(fontFamily:'Zilla Slab',
+        fontWeight: FontWeight.bold,
+       color: Theme.of(context).textSelectionColor
+      ),
+    ),
+            desc: "Pawword Reset Link Sent!",
+            buttons: [
+              DialogButton(
+                color: Color(0xff3671a4),
+                child: Text(
+                  "OK",
+                  style: TextStyle(fontFamily:'Zilla Slab',fontSize: 20,color: Colors.white),
+                ),
+                onPressed: () => Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+        (Route<dynamic> route) => false)
+              )
+            ],
+          ).show();
     }catch(error){
       var errorMessage = 'Authentication Failed. Please try later.';
       _showErrorDialog(errorMessage);

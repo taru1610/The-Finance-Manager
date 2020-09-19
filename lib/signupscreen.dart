@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:finance_manager/models/auth_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'main.dart';
-import 'package:provider/provider.dart';
-import 'models/authentication.dart';
+import 'models/locator.dart';
 import 'financescreen.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
@@ -21,6 +21,11 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
   bool passwordVisible = true;
   bool pass = true;
   String confirm,name;
+
+  
+
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
   final GlobalKey<FormState>_formKey = GlobalKey();
 
@@ -55,10 +60,11 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
     _formKey.currentState.save();
 
     try{
-      await Provider.of<Authentication>(context, listen: false).signUp(
-      _authData['email'],
-      _authData['password'],
-    );
+      await locator.get<AuthRepo>()
+        .signUpWithEmailAndPassword(
+        email: nameController.text,
+        password: passwordController.text,
+      );
     Alert(
       context: context,
       type: AlertType.success,
@@ -116,12 +122,11 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
   final Color secondaryColor = Color(0xff232c51);
   final Color logoGreen = Color(0xff25bcbb);
 
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomPadding: false,
+      resizeToAvoidBottomInset: false,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,

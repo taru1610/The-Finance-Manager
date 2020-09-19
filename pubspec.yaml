@@ -44,6 +44,7 @@ dependencies:
   firebase_analytics:
   cloud_firestore:
   firebase_storage:
+  get_it: ^5.0.0
 
 
 dev_dependencies:

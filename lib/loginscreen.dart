@@ -1,10 +1,11 @@
+
+import 'package:finance_manager/models/user_controller.dart';
 import 'package:finance_manager/resetscreen.dart';
 import 'package:finance_manager/signupscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'financescreen.dart';
-import 'models/authentication.dart';
+import 'models/locator.dart';
 
 class LoginScreen extends StatefulWidget {
   static const routeName = '/login'; 
@@ -14,6 +15,11 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool passwordVisible = true;
+
+  
+  var  nameController = TextEditingController();
+  var passwordController = TextEditingController();
+
   final GlobalKey<FormState>_formKey = GlobalKey();
 
   Map<String,String> _authData = {
@@ -46,19 +52,17 @@ class _LoginScreenState extends State<LoginScreen> {
     _formKey.currentState.save();
 
     try{
-      await Provider.of<Authentication>(context, listen: false).logIn(
-      _authData['email'],
-      _authData['password'],
+      await locator.get<UserController>()
+        .signInWithEmailAndPassword(
+        email: nameController.text,
+        password: passwordController.text,
       );
       Navigator.of(context).pushReplacementNamed(FinanceScreen.routeName);
+
     }catch(error){
       switch(error.toString()){
    case 'PlatformException(ERROR_NETWORK_REQUEST_FAILED, A network error (such as timeout, interrupted connection or unreachable host) has occurred., null)':
        var val= "Check your connection!";
-       _showErrorDialog(val);
-       break;
-    case 'PlatformException(ERROR_EMAIL_ALREADY_IN_USE, The email address is already in use by another account., null)':  
-       var val="User already registered!";
        _showErrorDialog(val);
        break;
     default: var val= "Something went wrong!";
@@ -74,12 +78,11 @@ class _LoginScreenState extends State<LoginScreen> {
   final Color secondaryColor = Color(0xff232c51);
   final Color logoGreen = Color(0xFF26A69A);
 
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomPadding: false,
+      resizeToAvoidBottomInset: false,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -111,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       TextFormField(
                       controller: nameController,
                       style: TextStyle(color: Colors.white),
-                      keyboardType:TextInputType.emailAddress,
+                      //keyboardType:TextInputType.emailAddress,
                       decoration: InputDecoration(
                         contentPadding: EdgeInsets.symmetric(horizontal: 10),
                         labelText: 'Email',
@@ -143,7 +146,8 @@ class _LoginScreenState extends State<LoginScreen> {
             TextFormField(
               controller: passwordController,
               style: TextStyle(color: Colors.white),
-              keyboardType:TextInputType.emailAddress,
+              //keyboardType:TextInputType.emailAddress,
+              obscureText: passwordVisible,
               decoration: InputDecoration(
               contentPadding: EdgeInsets.symmetric(horizontal: 10),
               labelText: 'Password',

@@ -1,17 +1,11 @@
 import 'dart:io';
+import 'package:finance_manager/loginscreen.dart';
+import 'package:finance_manager/models/locator.dart';
+import 'package:finance_manager/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'models/authentication.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
-
-class User{
-  String userId;
-  User({this.userId});
-}
-
+import 'models/preference.dart';
+import 'models/user_controller.dart';
 
 class FinanceScreen extends StatefulWidget{
   static const routeName = '/finance';
@@ -20,63 +14,36 @@ class FinanceScreen extends StatefulWidget{
 }
 
 
-class _FinanceScreenState extends State<FinanceScreen> {
-  BuildContext context;
-  ApiService apiService;
-  SharedPreferences sharedPreferences;
+class _FinanceScreenState extends State<FinanceScreen> with TickerProviderStateMixin{
+
+   void logout() async {
+    HelperFunctions.saveUserLoggedInSharedPreference(false);
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+        (Route<dynamic> route) => false);
+  }
+
+UserModel _currentUser = locator.get<UserController>().currentUser;
   
     File _image;
     
     final Color primaryColor = Color(0xff18203d);
     final Color secondaryColor = Color(0xFFB388FF);
     final Color logoGreen = Color(0xFF7C4DFF);
-    
-    @override
-    void initState() {
-      super.initState();
-      apiService = ApiService();
-      getUser();
-    }
-
-  List<Profile> userFromJson(String responseBody) { 
-     final parsed = json.decode(responseBody).cast<Map<String, dynamic>>(); 
-     return parsed.map<Profile>((json) =>Profile.fromJson(json)).toList(); 
-  }
-    
-      Future<List<Profile>> getUser() async {
-        sharedPreferences = await SharedPreferences.getInstance();
-        int id = sharedPreferences.getInt("id");
-        final response = await client.get('$url/user/$id');
-        if(response.statusCode == 200){
-          return userFromJson(response.body);
-        }else return null;
-      }
-    
       @override
       Widget build(BuildContext context) {
     
         Future getImage() async{
           // ignore: deprecated_member_use
-          var image =  await ImagePicker.pickImage(source : ImageSource.gallery);
-    
-          setState((){
-            _image = image;
-            print('Image Path $_image');
-          });
-        }
-    
-        Future uploadImage(BuildContext context) async{
-          String filename = basename(_image.path);
-          StorageReference firebaseStorageReference = FirebaseStorage.instance.ref().child(filename);
-          StorageUploadTask uploadTask = firebaseStorageReference.putFile(_image);
-          StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
-          setState((){
-            
-            Scaffold.of(context).showSnackBar(
-              SnackBar(content: Text('Profile Picture Updated'),
-              ),
-            );
-          });
+        _image =  await ImagePicker.pickImage(source : ImageSource.gallery);
+
+        //upload Image
+        await locator.get<UserController>().uploadProfilePicture(_image);
+
+        //set state
+        setState(() {
+          
+        });
         }
     
         return Scaffold(  
@@ -110,9 +77,14 @@ class _FinanceScreenState extends State<FinanceScreen> {
                                   color: Colors.white,
                                 ),
                               ),
-                              Icon(
-                                Icons.person,
-                                color: Colors.white,
+                          GestureDetector(
+                            onTap: (){
+                              logout();
+                            },
+                                                              child: Icon(
+                                  Icons.exit_to_app,
+                                  color: Colors.white,
+                                ),
                               ),
                             ],
                           ),
@@ -176,30 +148,11 @@ class _FinanceScreenState extends State<FinanceScreen> {
                           ),
                         ]
                       ),
-                    SizedBox( width: 20,),
-                    FutureBuilder(
-                      future: apiService.updateProfile(){
-                        SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-                        int id = sharedPreferences.getInt("id");
-                      },
-                      builder: (BuildContext context, AsyncSnapshot<List<Profile>> snapshot) {
-                      if (snapshot.hasError) {
-                      return Center(
-                      child: Text(
-                        "Something wrong with message: ${snapshot.error.toString()}"),
-                      );
-                    } else if (snapshot.connectionState == ConnectionState.done) {
-                      return (Text('${snapshot.data.displayName}');
-                  } else {
-                    return CircularProgressIndicator();
-                  }
-                      }
-                    ),
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        "Christopher Summers",
+                                        " ${_currentUser.displayName}",
                                         style: TextStyle(
                                             fontSize: 20,
                                             fontWeight: FontWeight.w600,

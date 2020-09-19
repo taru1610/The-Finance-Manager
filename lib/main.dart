@@ -6,9 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'loginscreen.dart';
-import 'models/authentication.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,21 +16,15 @@ void main() async{
 
 class MyApp extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    var email = prefs.getString('email');
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: Authentication())
-      ],
-          child: MaterialApp(
+  Widget build(BuildContext context){
+    return MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Finance Manager',
         theme: ThemeData(
           primarySwatch: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: email == null ? LoginScreen() : MyHomePage(
+        home:MyHomePage(
           title: 'Finance Login Screen'
         ),
         routes: {
@@ -41,7 +33,6 @@ class MyApp extends StatelessWidget {
           FinanceScreen.routeName:(ctx) => FinanceScreen(),
           ResetScreen.routeName:(ctx) => ResetScreen(),
         },
-      ),
     );
   }
 }
