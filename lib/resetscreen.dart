@@ -5,6 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'loginscreen.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
+import 'models/auth_repo.dart';
+import 'models/auth_repo.dart';
+
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   Future sendPasswordResetEmail(String email) async{
     return await _firebaseAuth.sendPasswordResetEmail(email: email);
@@ -15,11 +18,12 @@ class ResetScreen extends StatefulWidget{
   @override
   State<StatefulWidget> createState() => ResetScreenState();
 }
-
+GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+final _scaffoldKey = GlobalKey<ScaffoldState>();
 class ResetScreenState extends State<ResetScreen> {
 
-  final GlobalKey<FormState>_formKey = GlobalKey();
-  String email;
+  bool isLoading=false;
+  TextEditingController email= TextEditingController();
 void _showErrorDialog(String msg){
     showDialog(
       context: context,
@@ -38,26 +42,81 @@ void _showErrorDialog(String msg){
     );
   }
 
-  Future<void> _submit() async{
+  // Future<void> _submit() async{
 
-    if(!_formKey.currentState.validate()){
-      return;
-    }
-    _formKey.currentState.save();
+  //   if(!_formKey.currentState.validate()){
+  //     return;
+  //   }
+  //   _formKey.currentState.save();
 
-    try{
-      await sendPasswordResetEmail(email);
+  //   try{
+  //     await sendPasswordResetEmail(email);
       
-    Alert(
-      context: context,
-      type: AlertType.success,
-      title: "SUCCESS",
-      style:AlertStyle(
-        backgroundColor: Theme.of(context).cardColor,
+  //   Alert(
+  //     context: context,
+  //     type: AlertType.success,
+  //     title: "SUCCESS",
+  //     style:AlertStyle(
+  //       backgroundColor: Theme.of(context).cardColor,
+  //     animationType: AnimationType.fromTop,
+  //     isCloseButton: false,
+  //     isOverlayTapDismiss: false,
+  //     descStyle: TextStyle(fontFamily:'Zilla Slab',fontSize: 18),
+  //     animationDuration: Duration(milliseconds: 400),
+  //     alertBorder: RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.circular(0.0),
+  //       side: BorderSide(
+  //        // color: Colors.grey,
+  //       ),
+  //     ),
+  //     titleStyle: TextStyle(fontFamily:'Zilla Slab',
+  //       fontWeight: FontWeight.bold,
+  //      color: Theme.of(context).textSelectionColor
+  //     ),
+  //   ),
+  //           desc: "Pawword Reset Link Sent!",
+  //           buttons: [
+  //             DialogButton(
+  //               color: Color(0xff3671a4),
+  //               child: Text(
+  //                 "OK",
+  //                 style: TextStyle(fontFamily:'Zilla Slab',fontSize: 20,color: Colors.white),
+  //               ),
+  //               onPressed: () => Navigator.of(context).pushAndRemoveUntil(
+  //       MaterialPageRoute(builder: (context) => LoginScreen()),
+  //       (Route<dynamic> route) => false)
+  //             )
+  //           ],
+  //         ).show();
+  //   }catch(error){
+  //     var errorMessage = 'Authentication Failed. Please try later.';
+  //     _showErrorDialog(errorMessage);
+  //   }
+    
+  // }
+
+AuthRepo authMethods= AuthRepo();
+void _submit(String email)async{
+   setState(() {
+      isLoading=true;
+    });
+   if (validatekey.currentState.validate()) {
+   validatekey.currentState.reset();
+      await authMethods.resetPass(email).then((onValue){
+         setState(() {
+      isLoading=false;
+    });
+        Alert(
+            context: context,
+            
+            type: AlertType.success,
+            title: "PASSWORD RESET",
+            style:AlertStyle(
+              backgroundColor: Theme.of(context).cardColor,
       animationType: AnimationType.fromTop,
       isCloseButton: false,
       isOverlayTapDismiss: false,
-      descStyle: TextStyle(fontFamily:'Zilla Slab',fontSize: 18),
+      descStyle: TextStyle(fontSize: 18,color: Theme.of(context).textSelectionColor),
       animationDuration: Duration(milliseconds: 400),
       alertBorder: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(0.0),
@@ -65,18 +124,18 @@ void _showErrorDialog(String msg){
          // color: Colors.grey,
         ),
       ),
-      titleStyle: TextStyle(fontFamily:'Zilla Slab',
+      titleStyle: TextStyle(
         fontWeight: FontWeight.bold,
        color: Theme.of(context).textSelectionColor
       ),
     ),
-            desc: "Pawword Reset Link Sent!",
+            desc: "Check your Email to reset Password!",
             buttons: [
               DialogButton(
                 color: Color(0xff3671a4),
                 child: Text(
                   "OK",
-                  style: TextStyle(fontFamily:'Zilla Slab',fontSize: 20,color: Colors.white),
+                  style: TextStyle(fontSize: 20,color: Colors.white),
                 ),
                 onPressed: () => Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => LoginScreen()),
@@ -84,24 +143,157 @@ void _showErrorDialog(String msg){
               )
             ],
           ).show();
-    }catch(error){
-      var errorMessage = 'Authentication Failed. Please try later.';
-      _showErrorDialog(errorMessage);
-    }
-    
-  }
+       print('email sent');
+      }).catchError((onError){
+        switch(onError.toString()){
+   case 'PlatformException(ERROR_USER_NOT_FOUND, There is no user record corresponding to this identifier. The user may have been deleted., null)':{
+      Alert(
+            context: context,
+            
+            type: AlertType.error,
+            title: "ERROR",
+            style:AlertStyle(
+      animationType: AnimationType.fromTop,
+      backgroundColor: Theme.of(context).cardColor,
+      isCloseButton: false,
+      isOverlayTapDismiss: false,
+      descStyle: TextStyle(color: Theme.of(context).textSelectionColor, fontSize: 18),
+      animationDuration: Duration(milliseconds: 400),
+      alertBorder: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(0.0),
+        side: BorderSide(
+         // color: Colors.grey,
+        ),
+      ),
+      titleStyle: TextStyle(
+        fontWeight: FontWeight.bold,
+       color: Theme.of(context).textSelectionColor
+      ),
+    ),
+            desc: "Please Register Yourself!",
+            buttons: [
+              DialogButton(
+                color: Color(0xff3671a4),
+                child: Text(
+                  "OK",
+                  style: TextStyle(fontSize: 20,color: Colors.white),
+                ),
+                onPressed: () =>  Navigator.of(context).pop(),)
+            ],
+          ).show();
+        setState(() {
+          isLoading=false;
+        });
+   }
+   break;
+   case 'PlatformException(ERROR_NETWORK_REQUEST_FAILED, A network error (such as timeout, interrupted connection or unreachable host) has occurred., null)':{
+           Alert(
+            context: context,
+            
+            type: AlertType.error,
+            title: "ERROR",
+            style:AlertStyle(
+      animationType: AnimationType.fromTop,
+      backgroundColor: Theme.of(context).cardColor,
+      isCloseButton: false,
+      isOverlayTapDismiss: false,
+      descStyle: TextStyle(fontSize: 18,color: Theme.of(context).textSelectionColor),
+      animationDuration: Duration(milliseconds: 400),
+      alertBorder: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(0.0),
+        side: BorderSide(
+         // color: Colors.grey,
+        ),
+      ),
+      titleStyle: TextStyle(
+        fontWeight: FontWeight.bold,
+       color: Theme.of(context).textSelectionColor
+      ),
+    ),
+            desc: "Check your connection!",
+            buttons: [
+              DialogButton(
+                color: Color(0xff3671a4),
+                child: Text(
+                  "OK",
+                  style: TextStyle(fontSize: 20,color: Colors.white),
+                ),
+                onPressed: () =>  Navigator.of(context).pop()
+              )
+            ],
+          ).show();
+        setState(() {
+          isLoading=false;
+        });
+   }
+        break;
+        default:{
+                Alert(
+            context: context,
+            
+            type: AlertType.error,
+            title: "ERROR",
+            style:AlertStyle(
+      animationType: AnimationType.fromTop,
+      backgroundColor: Theme.of(context).cardColor,
+      isCloseButton: false,
+      isOverlayTapDismiss: false,
+      descStyle: TextStyle(fontSize: 18,color: Theme.of(context).textSelectionColor),
+      animationDuration: Duration(milliseconds: 400),
+      alertBorder: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(0.0),
+        side: BorderSide(
+         // color: Colors.grey,
+        ),
+      ),
+      titleStyle: TextStyle(
+        fontWeight: FontWeight.bold,
+       color: Theme.of(context).textSelectionColor
+      ),
+    ),
+            desc: "Someting went wrong!",
+            buttons: [
+              DialogButton(
+                color: Color(0xff3671a4),
+                child: Text(
+                  "OK",
+                  style: TextStyle(fontSize: 20,color: Colors.white),
+                ),
+                onPressed: () =>  Navigator.of(context).pop()
+              )
+            ],
+          ).show();
+        setState(() {
+          isLoading=false;
+        });
+        }
+        
+        }
+                print(onError);
+     
+      });
+   }
+   
+}
+
 
 
   final Color primaryColor = Color(0xff18203d);
   final Color secondaryColor = Color(0xff232c51);
   final Color logoGreen = Color(0xff25bcbb);
 
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    _displaySnackBar(BuildContext context, String a) {
+      final snackBar = SnackBar(
+        content: Text(a,style: TextStyle(color:Colors.white,fontWeight: FontWeight.bold) ,textAlign: TextAlign.center),
+        backgroundColor:Colors.black,
+      );
+      _scaffoldKey.currentState.showSnackBar(snackBar);
+    }
     return Scaffold(
+      key: _scaffoldKey,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -130,7 +322,7 @@ void _showErrorDialog(String msg){
                   key: _formKey,
                   child:
                       TextFormField(
-                      controller: nameController,
+                      controller: email,
                       style: TextStyle(color: Colors.white),
                       keyboardType:TextInputType.emailAddress,
                       decoration: InputDecoration(
@@ -147,16 +339,7 @@ void _showErrorDialog(String msg){
                   color: secondaryColor),
                 ),
                     ),
-                    validator: (value){
-                      if(value.isEmpty || !value.contains('@')){
-                    return 'invalid email';
-                  }
-                  return null;
-                },
-                onSaved: (value){
-                  email = value;
-                },
-              ),
+                  ),
           ),
         ),
                 SizedBox(height: 50),
@@ -169,7 +352,19 @@ void _showErrorDialog(String msg){
                   minWidth: double.maxFinite,
                   height: 50,
                   onPressed: () {
-                    _submit();
+                      print(email);
+                        validatekey.currentState.save();
+                        if (email.text.isEmpty) {
+                          _displaySnackBar(context, "Please enter your Email");
+                        } else if (!RegExp(
+                                r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                            .hasMatch(email.text))
+                          _displaySnackBar(context, "Please Fill valid Email");
+                       
+                        else {
+                          _submit(email.text);
+                        }
+
                   },
                   color: logoGreen,
                   child: Text('Submit',

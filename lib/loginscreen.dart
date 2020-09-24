@@ -1,17 +1,24 @@
 
-import 'package:finance_manager/models/user_controller.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:finance_manager/models/database.dart';
+import 'package:finance_manager/models/user.dart';
 import 'package:finance_manager/resetscreen.dart';
 import 'package:finance_manager/signupscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'financescreen.dart';
+import 'models/auth_repo.dart';
 import 'models/locator.dart';
+import 'models/preference.dart';
+
 
 class LoginScreen extends StatefulWidget {
   static const routeName = '/login'; 
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
+final _scaffoldKey = GlobalKey<ScaffoldState>();
+GlobalKey<FormState> validatekey = GlobalKey<FormState>();
 
 class _LoginScreenState extends State<LoginScreen> {
   bool passwordVisible = true;
@@ -19,13 +26,19 @@ class _LoginScreenState extends State<LoginScreen> {
   
   var  nameController = TextEditingController();
   var passwordController = TextEditingController();
-
-  final GlobalKey<FormState>_formKey = GlobalKey();
-
-  Map<String,String> _authData = {
-    'email' : '',
-    'password': '',
-  };
+AuthRepo _authRepo= AuthRepo();
+  Database databaseMethods = Database();
+  QuerySnapshot usersnapshot;
+  bool isLoading = false;
+  String val;
+  bool validateAndSave() {
+    final FormState form = validatekey.currentState;
+    if (form.validate()) {
+      form.save();
+      return true;
+    }
+    return false;
+  }
 
   void _showErrorDialog(String msg){
     showDialog(
@@ -44,33 +57,92 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+ void _login(String email, String pass) async {
+    if (validatekey.currentState.validate()) {
+      setState(() {
+        isLoading = true;
+      });
 
-  Future<void> _login() async{
-    if(!_formKey.currentState.validate()){
-      return;
-    }
-    _formKey.currentState.save();
+      await _authRepo.signInWithEmailAndPassword(email, pass)
+          .then((value) async {
+   
+        databaseMethods.getUserByEmail(email).then((uservalue) {
+          usersnapshot = uservalue;
+          UserInfo user = UserInfo(
+              name: usersnapshot.documents[0].data()["name"], email: email);
+          if (value != null) {
+            setState(() {
+              isLoading = true;
+            });
 
-    try{
-      await locator.get<UserController>()
-        .signInWithEmailAndPassword(
-        email: nameController.text,
-        password: passwordController.text,
-      );
-      Navigator.of(context).pushReplacementNamed(FinanceScreen.routeName);
-
-    }catch(error){
-      switch(error.toString()){
+            HelperFunctions.saveUserLoggedInSharedPreference(true);
+            HelperFunctions.saveUserNameSharedPreference(user.name);
+            print(user.name);
+            print(user.email);
+            HelperFunctions.saveUserEmailSharedPreference(email);
+            Navigator.pushAndRemoveUntil(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (BuildContext
+                                                            context) =>
+                                                       FinanceScreen()),
+                                                ModalRoute.withName('/'),
+                                              );
+          }
+        });
+      }).catchError((onError){
+switch(onError.toString()){
    case 'PlatformException(ERROR_NETWORK_REQUEST_FAILED, A network error (such as timeout, interrupted connection or unreachable host) has occurred., null)':
        var val= "Check your connection!";
        _showErrorDialog(val);
        break;
     default: var val= "Something went wrong!";
       _showErrorDialog(val);
-      };
+      }
     }
+
+      );
+      
+      }}
+  // void _login(String email, String pass) async{
+  //   if (validatekey.currentState.validate()) {
+  //     setState(() {
+  //       isLoading = true;
+  //     });
+      
+  //     }
+
+  //   try{
+  //     await locator.get<UserController>()
+  //       .signInWithEmailAndPassword(
+  //       email: nameController.text,
+  //       password: passwordController.text,
+  //     );
+  //     Navigator.of(context).pushReplacementNamed(FinanceScreen.routeName);
+
+  //   }catch(error){
+  //     switch(error.toString()){
+  //  case 'PlatformException(ERROR_NETWORK_REQUEST_FAILED, A network error (such as timeout, interrupted connection or unreachable host) has occurred., null)':
+  //      var val= "Check your connection!";
+  //      _showErrorDialog(val);
+  //      break;
+  //   default: var val= "Something went wrong!";
+  //     _showErrorDialog(val);
+  //     };
+  //   }
     
-  }
+  // }
+  _displaySnackBar(BuildContext context, String a) {
+      final snackBar = SnackBar(
+        content: Text(a,
+            style: TextStyle(
+                color:Colors.white,
+                fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center),
+        backgroundColor:  Colors.black,
+      );
+      _scaffoldKey.currentState.showSnackBar(snackBar);
+    }
 
   showErrorDialog(String errormessage) => _showErrorDialog(errormessage);
 
@@ -80,7 +152,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return isLoading?Container(color: Colors.white,child: Center(child:CircularProgressIndicator()),):Scaffold(
+      key: _scaffoldKey,
       resizeToAvoidBottomPadding: false,
       resizeToAvoidBottomInset: false,
         appBar: AppBar(
@@ -108,7 +181,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   child: Form(
-                  key: _formKey,
+                  key: validatekey,
                   child: Column(
                     children: <Widget>[
                       TextFormField(
@@ -130,15 +203,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   color: secondaryColor),
                 ),
                     ),
-                    validator: (value){
-                      if(value.isEmpty || !value.contains('@')){
-                    return 'invalid email';
-                  }
-                  return null;
-                },
-                onSaved: (value){
-                  _authData['email'] = value;
-                },
+                   
+             
               ),
 
               SizedBox(height:30),
@@ -178,9 +244,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     }
                     return null;
                 },
-                onSaved: (value){
-                  _authData['password'] = value;
-                },
+              
               ),
              ]
             )
@@ -196,7 +260,25 @@ class _LoginScreenState extends State<LoginScreen> {
                   minWidth: double.maxFinite,
                   height: 50,
                   onPressed: () {
-                    _login();
+                     print(nameController);
+                                              validatekey.currentState.save();
+                                             
+                                              if (nameController.text.isEmpty) {
+                                                _displaySnackBar(context,
+                                                    "Please enter your Email");
+                                              } else if (!RegExp(
+                                                      r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                                                  .hasMatch(nameController.text))
+                                                _displaySnackBar(context,
+                                                    "Please Fill valid Email");
+                                              else if (passwordController.text.isEmpty)
+                                                _displaySnackBar(context,
+                                                    "Please enter your Password");
+                                                     
+                                              else {
+                                               _login(nameController.text, passwordController.text);
+                                              }
+                
                   },
                   color: logoGreen,
                   child: Text('Login',

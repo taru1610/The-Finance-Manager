@@ -23,7 +23,7 @@ class _FinanceScreenState extends State<FinanceScreen> with TickerProviderStateM
         (Route<dynamic> route) => false);
   }
 
-UserModel _currentUser = locator.get<UserController>().currentUser;
+// UserModel _currentUser = locator.get<UserController>().currentUser;
   
     File _image;
     
@@ -38,7 +38,7 @@ UserModel _currentUser = locator.get<UserController>().currentUser;
         _image =  await ImagePicker.pickImage(source : ImageSource.gallery);
 
         //upload Image
-        await locator.get<UserController>().uploadProfilePicture(_image);
+        // await locator.get<UserController>().uploadProfilePicture(_image);
 
         //set state
         setState(() {
@@ -152,7 +152,7 @@ UserModel _currentUser = locator.get<UserController>().currentUser;
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        " ${_currentUser.displayName}",
+                                        " abcd",
                                         style: TextStyle(
                                             fontSize: 20,
                                             fontWeight: FontWeight.w600,

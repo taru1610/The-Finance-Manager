@@ -1,10 +1,10 @@
 import 'package:finance_manager/financescreen.dart';
+import 'package:finance_manager/models/preference.dart';
 import 'package:finance_manager/resetscreen.dart';
 import 'package:finance_manager/signupscreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'loginscreen.dart';
 
@@ -13,8 +13,26 @@ void main() async{
   await Firebase.initializeApp();
   runApp(MyApp());
 }
-
-class MyApp extends StatelessWidget {
+  class MyApp extends StatefulWidget {
+        @override
+        _MyAppState createState() => _MyAppState();
+      }
+class _MyAppState extends State<MyApp> {
+     bool userIsLoggedIn;
+@override
+  void initState() {
+    getLoggedInState();
+    super.initState();
+  }
+       getLoggedInState() async {
+    await HelperFunctions.getUserLoggedInSharedPreference().then((value){
+      setState(() {
+        userIsLoggedIn  = value;
+        print(value);
+      });
+    });
+  //   HelperFunctions.saveAdminLoggedInSharedPreference(false);
+  }
   @override
   Widget build(BuildContext context){
     return MaterialApp(
@@ -24,7 +42,9 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home:MyHomePage(
+        home: userIsLoggedIn != null ?  userIsLoggedIn ? FinanceScreen() :MyHomePage(
+          title: 'Finance Login Screen'
+        ):MyHomePage(
           title: 'Finance Login Screen'
         ),
         routes: {

@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:finance_manager/loginscreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:finance_manager/models/auth_repo.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +7,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'main.dart';
+import 'models/auth_repo.dart';
+import 'models/auth_repo.dart';
 import 'models/locator.dart';
 import 'financescreen.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -16,23 +20,21 @@ class SignupScreen extends StatefulWidget {
   @override
   _SignupScreenState createState() => _SignupScreenState();
 }
-
+GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+final _scaffoldKey = GlobalKey<ScaffoldState>();
 class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMixin {
   bool passwordVisible = true;
   bool pass = true;
-  String confirm,name;
+ 
 
   
 
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+ TextEditingController nameController = TextEditingController();
+ TextEditingController emailController = TextEditingController();
+ TextEditingController passwordController = TextEditingController();
+ TextEditingController confirmController = TextEditingController();
 
-  final GlobalKey<FormState>_formKey = GlobalKey();
 
-  Map<String,String> _authData = {
-    'email' : '',
-    'password': '',
-  };
 
   void _showErrorDialog(String msg){
     showDialog(
@@ -51,30 +53,68 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
       ),
     );
   }
-
-  Future<void> _signup() async{
-
-    if(!_formKey.currentState.validate()){
-      return;
+bool validateAndSave() {
+    final FormState form = _formKey.currentState;
+    if (form.validate()) {
+      form.save();
+      return true;
     }
-    _formKey.currentState.save();
+    return false;
+  }
+bool isLoading= false;
+   final databaseReference = FirebaseFirestore.instance;
+AuthRepo authMethods= AuthRepo();
+String val;
+void _signUp(String email, String pass) async{
+    setState(() {
+      isLoading=true;
+    });
+   await authMethods.signUpwithEmailAndPassword(email, pass).then((value){
+      
+     if(value!=null){
+    databaseReference.collection("register")
+        .add({
+          'name': nameController.text,
+          'email': email,
+        }).then((onValue){
+                   setState(() {
+      isLoading=false;
+    });
+             Navigator.pushAndRemoveUntil(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (BuildContext
+                                                            context) =>
+                                                       LoginScreen()),
+                                                ModalRoute.withName('/'),
+                                              );
+        });
+     }
+     //ending if
+     
+    }).catchError((onError){
+          print(onError);
+          switch(onError.toString()){
+   case 'PlatformException(ERROR_NETWORK_REQUEST_FAILED, A network error (such as timeout, interrupted connection or unreachable host) has occurred., null)':
+       val= "Check your connection!";
+       break;
+    case 'PlatformException(ERROR_EMAIL_ALREADY_IN_USE, The email address is already in use by another account., null)':  
+       val="User already registered!";
+       break;
+    default: val= "Something went wrong!";
+          }
 
-    try{
-      await locator.get<AuthRepo>()
-        .signUpWithEmailAndPassword(
-        email: nameController.text,
-        password: passwordController.text,
-      );
-    Alert(
-      context: context,
-      type: AlertType.success,
-      title: "SUCCESS",
-      style:AlertStyle(
-        backgroundColor: Theme.of(context).cardColor,
+      Alert(
+            context: context,
+            
+            type: AlertType.error,
+            title: "ERROR",
+            style:AlertStyle(
       animationType: AnimationType.fromTop,
+      backgroundColor: Theme.of(context).cardColor,
       isCloseButton: false,
       isOverlayTapDismiss: false,
-      descStyle: TextStyle(fontFamily:'Zilla Slab',fontSize: 18),
+      descStyle: TextStyle(fontSize: 18,color: Theme.of(context).textSelectionColor),
       animationDuration: Duration(milliseconds: 400),
       alertBorder: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(0.0),
@@ -82,41 +122,100 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
          // color: Colors.grey,
         ),
       ),
-      titleStyle: TextStyle(fontFamily:'Zilla Slab',
+      titleStyle: TextStyle(
         fontWeight: FontWeight.bold,
        color: Theme.of(context).textSelectionColor
       ),
     ),
-            desc: "Registered Successfully!",
+            desc: val,
             buttons: [
               DialogButton(
                 color: Color(0xff3671a4),
                 child: Text(
                   "OK",
-                  style: TextStyle(fontFamily:'Zilla Slab',fontSize: 20,color: Colors.white),
+                  style: TextStyle(fontSize: 20,color: Colors.white),
                 ),
-                onPressed: () => Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => FinanceScreen()),
-        (Route<dynamic> route) => false)
+                onPressed: () => Navigator.of(context).pop()
               )
             ],
           ).show();
-    
-    }catch(error){
-      switch(error.toString()){
-   case 'PlatformException(ERROR_NETWORK_REQUEST_FAILED, A network error (such as timeout, interrupted connection or unreachable host) has occurred., null)':
-       var val= "Check your connection!";
-       _showErrorDialog(val);
-       break;
-    case 'PlatformException(ERROR_EMAIL_ALREADY_IN_USE, The email address is already in use by another account., null)':  
-       var val="User already registered!";
-       _showErrorDialog(val);
-       break;
-    default: var val= "Something went wrong!";
-              _showErrorDialog(val);
-      }
-    }
+setState(() {
+      isLoading=false;
+    });
+    });
+
+  
+
+
   }
+
+
+
+  // Future<void> _signup() async{
+
+  //   if(!_formKey.currentState.validate()){
+  //     return;
+  //   }
+  //   _formKey.currentState.save();
+
+  //   try{
+  //     await locator.get<AuthRepo>()
+  //       .signUpWithEmailAndPassword(
+  //       email: nameController.text,
+  //       password: passwordController.text,
+  //     );
+  //   Alert(
+  //     context: context,
+  //     type: AlertType.success,
+  //     title: "SUCCESS",
+  //     style:AlertStyle(
+  //       backgroundColor: Theme.of(context).cardColor,
+  //     animationType: AnimationType.fromTop,
+  //     isCloseButton: false,
+  //     isOverlayTapDismiss: false,
+  //     descStyle: TextStyle(fontFamily:'Zilla Slab',fontSize: 18),
+  //     animationDuration: Duration(milliseconds: 400),
+  //     alertBorder: RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.circular(0.0),
+  //       side: BorderSide(
+  //        // color: Colors.grey,
+  //       ),
+  //     ),
+  //     titleStyle: TextStyle(fontFamily:'Zilla Slab',
+  //       fontWeight: FontWeight.bold,
+  //      color: Theme.of(context).textSelectionColor
+  //     ),
+  //   ),
+  //           desc: "Registered Successfully!",
+  //           buttons: [
+  //             DialogButton(
+  //               color: Color(0xff3671a4),
+  //               child: Text(
+  //                 "OK",
+  //                 style: TextStyle(fontFamily:'Zilla Slab',fontSize: 20,color: Colors.white),
+  //               ),
+  //               onPressed: () => Navigator.of(context).pushAndRemoveUntil(
+  //       MaterialPageRoute(builder: (context) => FinanceScreen()),
+  //       (Route<dynamic> route) => false)
+  //             )
+  //           ],
+  //         ).show();
+    
+  //   }catch(error){
+  //     switch(error.toString()){
+  //  case 'PlatformException(ERROR_NETWORK_REQUEST_FAILED, A network error (such as timeout, interrupted connection or unreachable host) has occurred., null)':
+  //      var val= "Check your connection!";
+  //      _showErrorDialog(val);
+  //      break;
+  //   case 'PlatformException(ERROR_EMAIL_ALREADY_IN_USE, The email address is already in use by another account., null)':  
+  //      var val="User already registered!";
+  //      _showErrorDialog(val);
+  //      break;
+  //   default: var val= "Something went wrong!";
+  //             _showErrorDialog(val);
+  //     }
+  //   }
+  // }
 
   final Color primaryColor = Color(0xff18203d);
   final Color secondaryColor = Color(0xff232c51);
@@ -124,7 +223,19 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+     _displaySnackBar(BuildContext context, String a) {
+      final snackBar = SnackBar(
+        content: Text(a,
+            style: TextStyle(
+                color:  Colors.black,
+                fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center),
+        backgroundColor: Colors.white,
+      );
+      _scaffoldKey.currentState.showSnackBar(snackBar);
+    }
+    return isLoading?Container(color: Colors.white,child: Center(child:CircularProgressIndicator()),):Scaffold(
+      key: _scaffoldKey,
       resizeToAvoidBottomPadding: false,
       resizeToAvoidBottomInset: false,
         appBar: AppBar(
@@ -159,7 +270,8 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
             children: <Widget>[
               TextFormField(
               style: TextStyle(color: Colors.white),
-              keyboardType:TextInputType.emailAddress,
+              controller: nameController,
+              keyboardType:TextInputType.name,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                 borderSide: BorderSide(
@@ -176,19 +288,11 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
                   // prefix: Icon(icon),
                   
                   ),
-                  validator: (value){
-                    if(value.isEmpty ){
-                      return 'invalid name';
-                    }
-                    return null;
-                  },
-                onSaved: (value){
-                  name = value;
-                },
+                 
         ),
         SizedBox(height:30),
               TextFormField(
-              controller: nameController,
+              controller: emailController,
               style: TextStyle(color: Colors.white),
               keyboardType:TextInputType.emailAddress,
               decoration: InputDecoration(
@@ -207,15 +311,7 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
                   // prefix: Icon(icon),
                   
                   ),
-                  validator: (value){
-                    if(value.isEmpty || !value.contains('@')){
-                      return 'invalid email';
-                    }
-                    return null;
-                  },
-                onSaved: (value){
-                  _authData['email'] = value;
-                },
+                 
         ),
         SizedBox(height:30),
          TextFormField(
@@ -247,19 +343,11 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
                   color: secondaryColor),
                 ),
               ),
-              validator: (value){
-                if(value.isEmpty || value.length <= 5){
-                  return 'invalid password';
-                }
-                return null;
-              },
-              onSaved: (value){
-                _authData['password'] = value;
-              },
+            
         ),
           SizedBox(height:30),
         TextFormField(
-          //controller: passwordController,
+          controller: confirmController,
           style: TextStyle(color: Colors.white),
           keyboardType:TextInputType.emailAddress,
           obscureText: pass,
@@ -286,15 +374,7 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
                   color: secondaryColor),
                 ),
               ),
-              validator: (value){
-                if(value.isEmpty || value!= passwordController.text){
-                  return 'invalid Password';
-                }
-                return null;
-              },
-              onSaved: (value){
-                confirm = value;
-              },
+             
             ),
             ],
           ),
@@ -310,16 +390,36 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
                   minWidth: double.maxFinite,
                   height: 50,
                   onPressed: () {
-                  //  if(_authData['password'].compareTo(confirm)!=0){
-                    //  _scaffoldKey.currentState.showSnackBar(
-                    //    SnackBar(
-                    //      content: Text("Entered Password's don't match.",
-                    //      textAlign: TextAlign.center),
-                    //      backgroundColor: Colors.black,
-                    //      duration: Duration(seconds: 3),
-                    //    ));
-                   // }
-                    _signup();
+               print(emailController);
+                            _formKey.currentState.save();
+                             if(nameController.text.isEmpty) 
+                              {
+                                 {  _displaySnackBar(context, "Please enter Username");
+                              
+                                }
+                              }
+
+                            else if (emailController.text.isEmpty) {
+                              _displaySnackBar(context, "Please enter your Email");
+                            } else if (!RegExp(
+                  r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                                .hasMatch(emailController.text))
+                              _displaySnackBar(context, "Please Fill valid Email");
+                            else if (passwordController.text.isEmpty)
+                              _displaySnackBar(
+                                  context, "Please enter your Password");
+                            
+                              else
+if(passwordController.text.length<6)
+                        _displaySnackBar(context, "Password must be atleast 6 characters long");
+                        else
+if(passwordController.text.length!=confirmController.text.length)
+                        _displaySnackBar(context, "Entered password do not match");
+                            
+                        else{
+                          _signUp(emailController.text,passwordController.text);
+                        }
+          
                   },
                   color: logoGreen,
                   child: Text('Sign up',
@@ -345,7 +445,7 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
                 padding:EdgeInsets.symmetric(horizontal:10.0),
                   child:Container(
                   height:1.0,
-                  width:143.0,
+                  width:130.0,
                   color:Colors.grey,),
                   ),
                   ]
