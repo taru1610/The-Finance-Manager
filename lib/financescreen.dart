@@ -46,8 +46,9 @@ class _FinanceScreenState extends State<FinanceScreen> with TickerProviderStateM
         });
         }
     
-        return Scaffold(  
-          body: Stack(
+        return //Scaffold(
+          //body:
+          Stack(
             children: [
               Column(
                 children: [
@@ -383,8 +384,8 @@ class _FinanceScreenState extends State<FinanceScreen> with TickerProviderStateM
                 ),
               )
             ],
-          ),
-        );
+          );
+        //);
       }
     
       Container buildCategoryCard(
@@ -502,6 +503,3 @@ class _FinanceScreenState extends State<FinanceScreen> with TickerProviderStateM
       }
     }
   
-  class Profile {
-}
- 
