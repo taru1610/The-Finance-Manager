@@ -3,9 +3,14 @@ import 'package:finance_manager/loginscreen.dart';
 import 'package:finance_manager/models/locator.dart';
 import 'package:finance_manager/models/user.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_session/flutter_session.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:finance_manager/models/database.dart';
+import 'models/auth_repo.dart';
+import 'profile_screen.dart';
 import 'package:intl/intl.dart';import 'models/preference.dart';
 import 'models/user_controller.dart';
 
@@ -26,7 +31,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
         MaterialPageRoute(builder: (context) => LoginScreen()),
             (Route<dynamic> route) => false);
   }
-
+  /*dynamic title;
+  void fetch() async {
+    title = await FlutterSession().get("token").toString();}*/
 
 
 
@@ -37,6 +44,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
   final Color primaryColor = Color(0xff18203d);
   final Color secondaryColor = Color(0xFFB388FF);
   final Color logoGreen = Color(0xFF7C4DFF);
+  String name;
   @override
   Widget build(BuildContext context) {
 
@@ -84,41 +92,57 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
                               SizedBox(
                                 height: 10,
                               ),
-                              Text(
-                                "Username",
-                                style: TextStyle(
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.w800,
-                                    color: Colors.white),
-                              ),
-                             /* Row(
-                                children: [
-                                  Icon(
-                                    Icons.camera_front,
-                                    color: Colors.white,
-                                  ),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  RichText(
-                                    text: TextSpan(
-                                        text: "\$5320",
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                        children: [
-                                          TextSpan(
-                                              text: ".50",
-                                              style: TextStyle(
-                                                  color: Colors.white38))
-                                        ]),
-                                  )
-                                ],
-                              )*/
+                              /*FutureBuilder(
+                                future: FlutterSession().get('token'),
+                                builder:(context,usertoken) {
+                                  print('WFTWFTWFTWFTWFWTFWTFWTW'+usertoken.data);
+                                  String title;
+                                DocumentReference docref= FirebaseFirestore.instance.collection('register').doc(usertoken.data.toString());
+                                docref.get().then((datasnapshot){
+                                  print(datasnapshot.data()['name'].toString());
+                                  return Text(datasnapshot.data()['name'].toString(),
+                                    style: TextStyle(
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.w800,
+                                        color: Colors.white),
+                                    softWrap: true,);
+                                }
+                                  );
+
+                                print('wftfwtfwtfwtwftwfw '+title);*/
+                                 Text('Username',
+        style: TextStyle(
+            fontSize: 30,
+            fontWeight: FontWeight.w800,
+            color: Colors.white),
+        softWrap: true,),
+
+
+
+                                  //DocumentReference docref =Firestore.instance.collection('register').('email',isEqualTo: usertoken.data.toString());
+                                  //docref.get().then((datasnapshot) => name= datasnapshot.data()["name"].toString());
+                                  /*return Text(
+                                    'sample'
+                                  ,
+                                  style: TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white),
+                                  softWrap: true,);
+                                } ),*/
+
                             ],
-                          )
-                        ],
+                          ),
+                          Container(
+                            decoration: BoxDecoration(border: Border.all(color: Colors.white70), shape: BoxShape.circle),
+                            child: FlatButton(onPressed:(){
+    Navigator.push(context,
+    MaterialPageRoute(builder: (_) => UserScreen()));
+    },
+     child: Icon(Icons.arrow_forward,color: Colors.white,size:30,),/*label: Text('Profile', style: TextStyle(color:Colors.white70)*/
+                            ),
+                          )],
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
                       )
                     ],
                   ),

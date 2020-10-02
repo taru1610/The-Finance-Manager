@@ -1,10 +1,10 @@
   
 class UserModel {
   String uid;
-  String displayName;
+  String name;
   String avatarUrl;
 
-  UserModel(this.uid, {this.displayName, this.avatarUrl});
+  UserModel(this.uid, {this.name, this.avatarUrl});
 }
 
 class UserInfo{

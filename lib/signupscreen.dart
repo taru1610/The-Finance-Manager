@@ -72,21 +72,21 @@ void _signUp(String email, String pass) async{
    await authMethods.signUpwithEmailAndPassword(email, pass).then((value){
       
      if(value!=null){
-    databaseReference.collection("register")
-        .add({
+    databaseReference.collection("register").doc(email)
+        .set({
           'name': nameController.text,
           'email': email,
         }).then((onValue){
                    setState(() {
       isLoading=false;
     });
-             Navigator.pushAndRemoveUntil(
+             Navigator.push(
                                                 context,
                                                 MaterialPageRoute(
                                                     builder: (BuildContext
                                                             context) =>
                                                        LoginScreen()),
-                                                ModalRoute.withName('/'),
+                                                //ModalRoute.withName('/'),
                                               );
         });
      }

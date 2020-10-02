@@ -6,6 +6,7 @@ import 'package:finance_manager/resetscreen.dart';
 import 'package:finance_manager/signupscreen.dart';
 import 'package:finance_manager/tabs_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_session/flutter_session.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'financescreen.dart';
 import 'models/auth_repo.dart';
@@ -75,11 +76,13 @@ AuthRepo _authRepo= AuthRepo();
             setState(() {
               isLoading = true;
             });
-
+            var session =FlutterSession();
+            session.set("token",user.email);
             HelperFunctions.saveUserLoggedInSharedPreference(true);
             HelperFunctions.saveUserNameSharedPreference(user.name);
             print(user.name);
             print(user.email);
+
             HelperFunctions.saveUserEmailSharedPreference(email);
             Navigator.pushAndRemoveUntil(
                                                 context,
@@ -90,7 +93,9 @@ AuthRepo _authRepo= AuthRepo();
                                                 ModalRoute.withName('/'),
                                               );
           }
-        });
+        }
+
+        );
       }).catchError((onError){
 switch(onError.toString()){
    case 'PlatformException(ERROR_NETWORK_REQUEST_FAILED, A network error (such as timeout, interrupted connection or unreachable host) has occurred., null)':

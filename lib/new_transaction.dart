@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' ;
+import 'package:flutter_session/flutter_session.dart';
 
 class NewTransaction extends StatefulWidget {
   final String category;
@@ -18,8 +19,15 @@ class _NewTransactionState extends State<NewTransaction> {
   final amountController =TextEditingController();
 
   @override
-
+  String userid;
   Widget build(BuildContext context) {
+    FutureBuilder(future: FlutterSession().get('token'),
+    builder:(context,token) {
+      userid= token.data.toString();
+      return Container();
+
+    }
+    );
 
     return SingleChildScrollView(
       child: Card(
@@ -65,6 +73,7 @@ class _NewTransactionState extends State<NewTransaction> {
                         "description":descriptionController.text,
                         "category": widget.category,
                         "date": DateTime.now(),
+                        "user":userid,
                       };
                       documentReference.set(transaction).whenComplete(() => print("created"));
                   //widget.addTX(titleController.text, double.parse(amountController.text));

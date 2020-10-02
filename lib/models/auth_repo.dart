@@ -2,6 +2,7 @@
 import 'package:finance_manager/models/user.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_session/flutter_session.dart';
 // class User{
 
 //   String userId;
@@ -28,6 +29,7 @@ class AuthRepo {
 
     final FirebaseUser user =(await _auth.signInWithCredential(credential)).user;
     print("signed in " + user.displayName);
+
     return user;
   }
 
@@ -35,22 +37,30 @@ class AuthRepo {
 
   Future<UserModel> getUser() async {
     var firebaseUser = await _auth.currentUser;
-      return UserModel(firebaseUser.uid, displayName: firebaseUser.displayName);
+      return UserModel(firebaseUser.uid, name: firebaseUser.displayName);
   }
 
   Future signInWithEmailAndPassword(String email, String pass) async{
     final UserCredential authResult =await _auth.signInWithEmailAndPassword(email: email, password: pass);
   final User user= authResult.user;
+   //final UserInfo curruser= ;
+    /*var session =FlutterSession();
+    await session.set("token",user.uid);*/
+    //await session.set("name",user.displayName);
+    print("signed in " + user.uid);
+
+
     return user;
 
  
 
 }
 Future signUpwithEmailAndPassword(String email, String pass)async{
-  final UserCredential authResult = await _auth.createUserWithEmailAndPassword(email: email, password: pass);
+  final UserCredential authResult =
+  await _auth.createUserWithEmailAndPassword(email: email, password: pass);
   User user = authResult.user;
-    
        return user;
+
        
 
 }
