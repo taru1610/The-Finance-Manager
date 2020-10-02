@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'financescreen.dart';
 import 'add_transact.dart';
 import 'package:finance_manager/loginscreen.dart';
+import 'home.dart';
 import 'dart:io';
 
 import 'models/preference.dart';
@@ -15,11 +16,12 @@ class TabScreen extends StatefulWidget {
 }
 
 class _TabScreenState extends State<TabScreen> {
-  final List <Map<String,Object>> _pages =[{'page':FinanceScreen(),'title':'Finance'},{'page':AddTransactions(),'title':'Add Transactions'},{'page':UserProfile(),'title':'Profile'}];
+  final List <Map<String,Object>> _pages =[{'page':HomeScreen(),'title':'Home'},{'page':AddTransactions(),'title':'Add Transactions'},{'page':UserProfile(),'title':'Profile'}];
   int _selectedPageIndex=0;
   void _selectpage(int index){
     setState(() {
       _selectedPageIndex=index;
+
     });
   }
   void logout() async {
@@ -39,7 +41,8 @@ class _TabScreenState extends State<TabScreen> {
     ),
         drawer:Drawer(child: Text('The Drawer'),),
         body:_pages[_selectedPageIndex]['page'],
-        bottomNavigationBar:BottomNavigationBar(onTap: _selectpage,
+        bottomNavigationBar:BottomNavigationBar(onTap:_selectpage,
+
          // unselectedItemColor: Colors.black,
           selectedItemColor: Colors.white,
           unselectedItemColor:Color(0xFFB388FF) ,
