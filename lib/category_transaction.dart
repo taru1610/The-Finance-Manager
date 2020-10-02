@@ -1,10 +1,15 @@
+
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:finance_manager/category_transaction_item.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import 'models/preference.dart';
 import 'loginscreen.dart';
 import 'category_items.dart';
 import 'new_transaction.dart';
-
+import 'models/transaction.dart';
 class CategoryTransaction extends StatefulWidget {
 
 
@@ -22,8 +27,6 @@ class _CategoryTransactionState extends State<CategoryTransaction> {
         MaterialPageRoute(builder: (context) => LoginScreen()),
             (Route<dynamic> route) => false);}
 
-  //void _addNewTransaction(String title, double amount, String description, String category){
-    //final newTx= transact(title: title,amount: amount, date: DateTime.now(),description: description,category: category);
 
     //setState(() {
      // _userTransaction.add(newTx);
@@ -42,7 +45,9 @@ class _CategoryTransactionState extends State<CategoryTransaction> {
     });
   }
   final   List<String> Categories=['Food','Utilities','Taxes','Shopping','Healthcare','Misc','Transport','Rent/Loan', 'Personal Payments'];
-   @override
+
+
+  @override
   Widget build(BuildContext context) {
      final routeargs = ModalRoute
          .of(context)
@@ -50,7 +55,8 @@ class _CategoryTransactionState extends State<CategoryTransaction> {
          .arguments as Map<String, String>;
      final title = routeargs['title'];
      final ID = routeargs['id'];
-
+     final Images = routeargs['image'];
+     //final   List<Transaction> Transactions= DocumentReference.setData(title)
      return Scaffold(
        appBar: AppBar(title: Text(title)
          , actions:<Widget>[
@@ -62,13 +68,7 @@ class _CategoryTransactionState extends State<CategoryTransaction> {
        body:
        Column(
            children: [
-             /*ontainer(
-          height: 100.0,
-          width:double.infinity,
-            decoration: BoxDecoration(gradient: LinearGradient(colors: [Color(0xff18203d),Color(0xFFB388FF)] ,begin: Alignment.topLeft,end: Alignment.bottomRight )),
-            //child: Image.network('https://image.freepik.com/free-vector/abstract-blue-geometric-background_1035-9810.jpg',
-                //fit: BoxFit.cover, alignment:Alignment(-1.0,-1.0) ,color:Colors.white ,colorBlendMode: BlendMode.darken,),
-          ),*/
+
              Stack(
                  children: [
                    ClipRRect(
@@ -77,12 +77,8 @@ class _CategoryTransactionState extends State<CategoryTransaction> {
                        //topRight: Radius.circular(15),
 
                      ),
-                     /*child:Container(
-                width:double.infinity,
-                height:150,
-                decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.grey,Colors.white38] ,begin: Alignment.topLeft,end: Alignment.bottomRight )),
-              ),*/
-                     child: Image.network('https://image.freepik.com/free-vector/woman-choosing-healthy-unhealthy-food-concept-flat-illustration-fastfood-vs-balanced-menu-comparison-isolated-clipart-female-flat-cartoon-style-character-dieting-healthy-eating_126608-336.jpg',height: 160,alignment:Alignment(-1.0,-1.0),width: double.infinity,fit: BoxFit.cover,) ,
+
+                     child: Image.network(Images,height: 170,alignment:Alignment(-1.0,-1.0),width: double.infinity,fit: BoxFit.cover,) ,
                    ),
                    Positioned(
                        top: 10,
@@ -92,22 +88,9 @@ class _CategoryTransactionState extends State<CategoryTransaction> {
                            mainAxisAlignment: MainAxisAlignment.center,
                            crossAxisAlignment: CrossAxisAlignment.center,
                            children:[Container(
-                             width:320,
+    width:320,
 
-                             //padding: EdgeInsets.symmetric(vertical: 5,horizontal: 20),
-                             /*child: Center(
-                  child: Text('CATEGORIES', style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                  ),
-                    textAlign: TextAlign.center,
-                    softWrap: true,
-                    overflow: TextOverflow.fade,
-
-                  ),
-                ),*/
-                           ),
+    ),
                              //Center(child: IconButton(icon:Icon(Icons.add_circle, size: 50.0,), onPressed:(){})),
                            ]
                        )
@@ -128,21 +111,91 @@ class _CategoryTransactionState extends State<CategoryTransaction> {
 
                  child: Container(
                    decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.blueGrey,Colors.grey] ,begin: Alignment.topLeft,end: Alignment.bottomRight )),
-                   height: 125,
+                   height: 100,
+
+
                    child: SingleChildScrollView(
                      child: Column(
                        children: [
                          Container(
-                           height:350,
-                           child: ListView.builder(
-                             padding: const EdgeInsets.all(10),
-                             itemCount: Categories.length,
-                             itemBuilder: (ctx,i)=> CategoryItem(title:Categories[i], categoryId: i.toString()),
+                           height:300,
 
+
+                                child:  StreamBuilder( stream:FirebaseFirestore.instance.collection("Transaction").orderBy('date',descending: true).where('category',isEqualTo:title.toString()).snapshots(),
+
+    builder: (context,snapshot){
+    if(snapshot.hasData){
+    return ListView.builder(itemCount: snapshot.data.documents.length,
+
+    itemBuilder: (context,index){
+
+    DocumentSnapshot documentSnapshot =snapshot.data.docs[index];
+    Timestamp date = documentSnapshot.data()["date"];
+    return Container(
+      padding:const EdgeInsets.all(15),
+      margin: EdgeInsets.all(10.0) ,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+               decoration: BoxDecoration(border: Border.all(color: Colors.white12 ),borderRadius: BorderRadius.only(topRight: Radius.circular(20), bottomLeft: Radius.circular(20))),
+                child:Column(
+                  children: [
+                    Text(date.toDate().day.toString(), style: TextStyle(fontSize:17,color:Colors.white70 ),),
+
+                    Text(DateFormat.MMMM().format(date.toDate()).toString().substring(0,3), style: TextStyle(fontSize:15,color:Colors.white70 ),),
+                  ],
+                ),
+                //child:Text(documentSnapshot.data()["date"].toString()),
+              ),
+              SizedBox(width: 15,),
+              Column(
+                children: [
+                  Text(documentSnapshot.data()["title"].toString().toUpperCase(),style: TextStyle(color: Colors.black, fontSize: 15)),
+                  Text(documentSnapshot.data()["description"].toString(), style: TextStyle(color: Colors.black45, fontSize: 10),textAlign: TextAlign.start, softWrap: true,),
+                ],
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+              ),
+            ],
+            crossAxisAlignment: CrossAxisAlignment.center,
+
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+          //Icon(Icons.monetization_on,color: Colors.black54),
+              Text('\u{20B9}',style: TextStyle(color: Color(0xff18203d), fontSize: 15)),
+          Text(documentSnapshot.data()["amount"], style: TextStyle(color: Color(0xff18203d), fontSize: 15), softWrap: true,),
+          ]),
+        ],
+      ),
+
+      //decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.black54,Colors.black12] ,begin: Alignment.topLeft,end: Alignment.bottomRight), borderRadius: BorderRadius.circular(5)),
+
+    );
+
+
+    },
+    );
+    }
+                                else{
+                                  return Container(
+                                    width: double.infinity,
+                                    child:Center(child: Text('No Transaction Performed Yet')),
+                                  );
+                                }
+    }
+    //CategoryTransactionItem(docum);
+    ),
 
                              //gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 0.5/0.5,crossAxisSpacing: 10,mainAxisSpacing: 10),
                            ),
-                         ),
+
                          SizedBox(height:10),
                          Container(
                            width:175,

@@ -6,10 +6,11 @@ import 'package:flutter/material.dart';
 class CategoryItem extends StatelessWidget {
   final String title;
   final String categoryId;
-  CategoryItem({this.title,this.categoryId});
+  final String Images;
+  CategoryItem({this.title,this.categoryId,this.Images});
 
   void selectCategory(BuildContext ctx){
-    Navigator.of(ctx).pushNamed(CategoryTransaction.routeName, arguments: {'id': categoryId,'title':title});
+    Navigator.of(ctx).pushNamed(CategoryTransaction.routeName, arguments: {'id': categoryId,'title':title,'image':Images});
 
   }
   @override

@@ -64,6 +64,7 @@ class _NewTransactionState extends State<NewTransaction> {
                         "amount":amountController.text,
                         "description":descriptionController.text,
                         "category": widget.category,
+                        "date": DateTime.now(),
                       };
                       documentReference.set(transaction).whenComplete(() => print("created"));
                   //widget.addTX(titleController.text, double.parse(amountController.text));

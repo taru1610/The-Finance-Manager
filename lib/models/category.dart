@@ -1,5 +1,6 @@
 class Category{
   final String id;
+  final String image;
   final String name;
-  Category({this.id,this.name});
+  Category({this.image,this.name,this.id});
 }
