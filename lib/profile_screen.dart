@@ -45,6 +45,35 @@ class _UserScreenState extends State<UserScreen> {
                       ),
                       Positioned(top:30,left:30,
                           child: Container(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Row(
+                                  children: [
+                                    SizedBox(width:10),
+                                    Icon(Icons.payment,color: Colors.white,),
+                                    SizedBox(width:10),
+                                    Text('75',style: TextStyle(fontSize: 20,color: Colors.white),),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    SizedBox(width:10),
+                                    Icon(Icons.save_alt,color: Colors.white,),
+                                    SizedBox(width:10),
+                                    Text('4500',style: TextStyle(fontSize: 20,color: Colors.white),),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    SizedBox(width:10),
+                                    Icon(Icons.card_giftcard,color:Colors.white),
+                                    SizedBox(width:10),
+                                    Text('5',style: TextStyle(fontSize: 20,color: Colors.white),),
+                                  ],
+                                ),
+                              ],
+                            ),
                             height: 200,
                             width: 200,
                             decoration: BoxDecoration(gradient: LinearGradient(colors: [Color(0xFFB388FF)/*(0xff18203d)*/, Colors.deepPurpleAccent]), borderRadius: BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20),topLeft:Radius.circular(20),topRight: Radius.circular(20))),)),
@@ -85,21 +114,21 @@ class _UserScreenState extends State<UserScreen> {
                  child: Column( //mainAxisAlignment: MainAxisAlignment.spaceBetween,
                    children: [
                      Center(
-                       child: Text('Jane Doe', style:TextStyle(fontSize: 30,
+                       child: Text('Jennifer Smith', style:TextStyle(fontSize: 30,
                        fontWeight: FontWeight.w800,
                        color: Colors.white),
                    softWrap: true,),
                      ),
                      SizedBox(height: 30,),
                      Center(
-                       child: Text('Income', style:TextStyle(fontSize: 20,
+                       child: Text('Rs. 450,000', style:TextStyle(fontSize: 20,
                            //fontWeight: FontWeight.w800,
                            color: Colors.white70),
                          softWrap: true,),
                      ),
                      SizedBox(height: 15,),
                      Center(
-                       child: Text('email@gmail.com', style:TextStyle(fontSize: 20,
+                       child: Text('jennifersmith@gmail.com', style:TextStyle(fontSize: 20,
                            //fontWeight: FontWeight.w800,
                            color: Colors.white70),
                          softWrap: true,),

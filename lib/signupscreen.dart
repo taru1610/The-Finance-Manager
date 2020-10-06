@@ -44,10 +44,10 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
         content: Text(msg),
         actions: <Widget>[
           FlatButton(
-          onPressed: (){
-            Navigator.of(ctx).pop();
-          },
-          child: Text('Okay')
+              onPressed: (){
+                Navigator.of(ctx).pop();
+              },
+              child: Text('Okay')
           )
         ],
       ),
@@ -252,14 +252,14 @@ setState(() {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  'Sign Up and continue',
+                  'Sign Up',
                   textAlign: TextAlign.center,
                   style:
                       GoogleFonts.openSans(color: Colors.white, fontSize: 28),
                 ),
-                SizedBox(
+                /*SizedBox(
                   height: 50,
-                ),
+                )*/
                 SizedBox(height: 20),
                 
                 Container(
@@ -427,28 +427,30 @@ if(passwordController.text.length!=confirmController.text.length)
                   textColor: Colors.white,
                 ),
                 SizedBox(height:50),
-                Row(
-                  children: <Widget>[
-                    Padding(
-                      padding:EdgeInsets.symmetric(horizontal:10.0),
-                      child:Container(
-                      height:1.0,
-                      width:143.0,
-                      color:Colors.grey,),
-                      ),
-                Text(
-                  'or',
-                  textAlign: TextAlign.center,
-                  style:TextStyle(color: Colors.white,fontSize:16),
-                ),
-                Padding(
-                padding:EdgeInsets.symmetric(horizontal:10.0),
-                  child:Container(
-                  height:1.0,
-                  width:130.0,
-                  color:Colors.grey,),
+                Center(
+                  child: Row(
+                    children: <Widget>[
+                      Padding(
+                        padding:EdgeInsets.only(right:10.0,left:40.0),
+                        child:Container(
+                        height:1.0,
+                        width:100.0,
+                        color:Colors.grey,),
+                        ),
+                  Text(
+                    'or',
+                    textAlign: TextAlign.center,
+                    style:TextStyle(color: Colors.white,fontSize:16),
                   ),
-                  ]
+                  Padding(
+                  padding:EdgeInsets.only(left:10.0),
+                    child:Container(
+                    height:1.0,
+                    width:100.0,
+                    color:Colors.grey,),
+                    ),
+                    ]
+                  ),
                 ),
                 SizedBox(height: 30),
                 MaterialButton(

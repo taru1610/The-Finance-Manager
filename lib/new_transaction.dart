@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' ;
 import 'package:flutter_session/flutter_session.dart';
+import 'package:provider/provider.dart';
+import 'auth_service.dart';
+
+import 'auth_service.dart';
+
 
 class NewTransaction extends StatefulWidget {
   final String category;
@@ -17,17 +22,19 @@ class _NewTransactionState extends State<NewTransaction> {
   final titleController =TextEditingController();
   final descriptionController =TextEditingController();
   final amountController =TextEditingController();
+  final db= FirebaseFirestore.instance;
 
   @override
-  String userid;
+
   Widget build(BuildContext context) {
-    FutureBuilder(future: FlutterSession().get('token'),
+    /*FutureBuilder(future: FlutterSession().get('token'),
     builder:(context,token) {
       userid= token.data.toString();
+      print('lalalaal'+userid);
       return Container();
 
     }
-    );
+    );*/
 
     return SingleChildScrollView(
       child: Card(
@@ -65,17 +72,19 @@ class _NewTransactionState extends State<NewTransaction> {
                     elevation: 0,
                     minWidth: double.maxFinite,
                     height: 50,
-                  onPressed:() {
-                      DocumentReference documentReference= FirebaseFirestore.instance.collection("Transaction").doc();
+                  onPressed:() async{
+                      final uid= await context.read<AuthService>().getCurrentUID();
+
                       Map <String, dynamic> transaction ={
                         "title":titleController.text,
                         "amount":amountController.text,
                         "description":descriptionController.text,
                         "category": widget.category,
                         "date": DateTime.now(),
-                        "user":userid,
+                        //"user":userid,
                       };
-                      documentReference.set(transaction).whenComplete(() => print("created"));
+                      await db.collection('userdata').doc(uid).collection('transactions').add(transaction);
+                      //documentReference.set(transaction).whenComplete(() => print("created"));
                   //widget.addTX(titleController.text, double.parse(amountController.text));
                   Navigator.of(context).pop();
                 }, child:Text('Add transaction'), color: Colors.grey[300], ),

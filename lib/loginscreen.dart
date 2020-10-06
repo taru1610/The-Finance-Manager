@@ -166,7 +166,7 @@ switch(onError.toString()){
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),
-        backgroundColor: primaryColor,
+        backgroundColor: primaryColor ,
         body: Container(
           alignment: Alignment.topCenter,
           margin: EdgeInsets.symmetric(horizontal: 30),
@@ -319,10 +319,10 @@ switch(onError.toString()){
                   textColor: Colors.white,
                 ),
                 SizedBox(height: 100),
-                Align(
+                /*Align(
                   alignment: Alignment.bottomCenter,
                   child: _buildFooterLogo(),
-                )
+                )*/
               ],
             ),
           ),

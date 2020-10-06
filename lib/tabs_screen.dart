@@ -1,10 +1,17 @@
+import 'package:finance_manager/paymentscreen.dart';
 import 'package:finance_manager/profile.dart';
 import 'package:flutter/material.dart';
 import 'financescreen.dart';
+import 'package:provider/provider.dart';
 import 'add_transact.dart';
+
 import 'package:finance_manager/loginscreen.dart';
 import 'home.dart';
 import 'dart:io';
+import 'auth_service.dart';
+import 'loginpagenew.dart';
+import 'package:provider/provider.dart';
+
 
 import 'models/preference.dart';
 
@@ -16,7 +23,7 @@ class TabScreen extends StatefulWidget {
 }
 
 class _TabScreenState extends State<TabScreen> {
-  final List <Map<String,Object>> _pages =[{'page':HomeScreen(),'title':'Home'},{'page':AddTransactions(),'title':'Add Transactions'},{'page':UserProfile(),'title':'Profile'}];
+  final List <Map<String,Object>> _pages =[{'page':HomeScreen(),'title':'Home'},{'page':AddTransactions(),'title':'Add Transactions'},{'page':PaymentScreen(),'title':'Pay'}];
   int _selectedPageIndex=0;
   void _selectpage(int index){
     setState(() {
@@ -25,10 +32,9 @@ class _TabScreenState extends State<TabScreen> {
     });
   }
   void logout() async {
-    HelperFunctions.saveUserLoggedInSharedPreference(false);
-    Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => LoginScreen()),
-            (Route<dynamic> route) => false);}
+    context.read<AuthService>().signOut();
+
+  }
   @override
 
   Widget build(BuildContext context) {
@@ -50,7 +56,7 @@ class _TabScreenState extends State<TabScreen> {
           backgroundColor:Color(0xff18203d),items: [
             BottomNavigationBarItem(icon: Icon(Icons.home),title: Text('Home')),
             BottomNavigationBarItem(icon: Icon(Icons.add_box),title: Text('Add Transaction')),
-            BottomNavigationBarItem(icon: Icon(Icons.supervised_user_circle),title: Text('Profile')),
+            BottomNavigationBarItem(icon: Icon(Icons.payment),title: Text('Pay')),
           ],)
 
     );

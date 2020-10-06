@@ -308,7 +308,7 @@ void _submit(String email)async{
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  'Reset Password and continue',
+                  'Reset Password',
                   textAlign: TextAlign.center,
                   style:
                       GoogleFonts.openSans(color: Colors.white, fontSize: 28),
@@ -316,6 +316,8 @@ void _submit(String email)async{
 
                 SizedBox(height: 50,),
 
+                ClipRRect(borderRadius: BorderRadius.circular(50),child: Image.network('https://image.freepik.com/free-vector/forgot-password-login-woman-flat-illustration_111797-214.jpg')),
+                SizedBox(height: 50,),
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   child: Form(
@@ -377,18 +379,18 @@ void _submit(String email)async{
                     Navigator.push(context,
                       MaterialPageRoute(builder: (_) => LoginScreen()));
                   },
-                  child: Text('SignIn',
+                  /*child: Text('SignIn',
                     style: TextStyle(
                       color: Colors.white, 
                       fontSize: 12)
-                  ),
+                  ),*/
                   textColor: Colors.white,
                 ),
                 SizedBox(height: 100),
-                Align(
+                /*Align(
                   alignment: Alignment.bottomCenter,
                   child: _buildFooterLogo(),
-                )
+                )*/
               ],
             ),
           ),

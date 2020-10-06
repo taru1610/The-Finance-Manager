@@ -110,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
                                   );
 
                                 print('wftfwtfwtfwtwftwfw '+title);*/
-                                 Text('Username',
+                                 Text('Jennifer',
         style: TextStyle(
             fontSize: 30,
             fontWeight: FontWeight.w800,
