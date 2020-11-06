@@ -1,4 +1,4 @@
-
+//main file
 import 'package:finance_manager/category_transaction.dart';
 import 'package:finance_manager/financescreen.dart';
 
