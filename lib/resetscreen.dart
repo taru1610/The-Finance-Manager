@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+/*import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,9 +6,9 @@ import 'loginscreen.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 import 'models/auth_repo.dart';
-import 'models/auth_repo.dart';
+import 'models/auth_repo.dart';*/
 
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  /*final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   Future sendPasswordResetEmail(String email) async{
     return await _firebaseAuth.sendPasswordResetEmail(email: email);
   }
@@ -32,15 +32,15 @@ void _showErrorDialog(String msg){
         content: Text(msg),
         actions: <Widget>[
           FlatButton(
-          onPressed: (){
-            Navigator.of(ctx).pop();
+          onPressed: (){*/
+      /*      Navigator.of(ctx).pop();
           },
           child: Text('Okay')
           )
         ],
       ),
     );
-  }
+  }*/
 
   // Future<void> _submit() async{
 
@@ -95,6 +95,7 @@ void _showErrorDialog(String msg){
     
   // }
 
+/*
 AuthRepo authMethods= AuthRepo();
 void _submit(String email)async{
    setState(() {
@@ -379,18 +380,22 @@ void _submit(String email)async{
                     Navigator.push(context,
                       MaterialPageRoute(builder: (_) => LoginScreen()));
                   },
-                  /*child: Text('SignIn',
+                  */
+/*child: Text('SignIn',
                     style: TextStyle(
                       color: Colors.white, 
                       fontSize: 12)
-                  ),*/
+                  ),*//*
+
                   textColor: Colors.white,
                 ),
                 SizedBox(height: 100),
-                /*Align(
+                */
+/*Align(
                   alignment: Alignment.bottomCenter,
                   child: _buildFooterLogo(),
-                )*/
+                )*//*
+
               ],
             ),
           ),
@@ -418,4 +423,4 @@ void _submit(String email)async{
       ],
     );
   }
-}
+}*/

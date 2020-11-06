@@ -1,21 +1,21 @@
-import 'package:finance_manager/auth_service.dart';
+
 import 'package:finance_manager/category_transaction.dart';
 import 'package:finance_manager/financescreen.dart';
-import 'package:finance_manager/loginpagenew.dart';
+
 import 'package:finance_manager/models/preference.dart';
 import 'package:finance_manager/resetscreen.dart';
-import 'package:finance_manager/signupscreen.dart';
+import 'package:finance_manager/root_page.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:provider/provider.dart';
-import 'loginscreen.dart';
-import 'tabs_screen.dart';
-import 'auth_service.dart';
-import 'signupnew.dart';
-import 'loginpagenew.dart';
 
+import 'tabs_screen.dart';
+import 'auth.dart';
+
+import 'login_page.dart';
+import 'auth_provider.dart';
 
 Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,11 +44,8 @@ class _MyAppState extends State<MyApp> {
   }
   @override
   Widget build(BuildContext context){
-    return MultiProvider(
-      providers: [
-        Provider<AuthService>(create: (_)=>AuthService(FirebaseAuth.instance)),
-        StreamProvider(create: (context)=> context.read<AuthService>().onAuthStateChanged),
-      ],
+    return AuthProvider(
+      auth:Auth(),
       child: MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Finance Manager',
@@ -61,18 +58,18 @@ class _MyAppState extends State<MyApp> {
             visualDensity: VisualDensity.adaptivePlatformDensity,
             fontFamily: 'Montserrat'
           ),
-          home:AuthenticationWrapper(),
+          home:RootPage(),
           /*home: userIsLoggedIn != null ?  userIsLoggedIn ? TabScreen()
               : SplashScreen():MyHomePage(
       title: 'FinanceWiz'),*/
           routes: {
             //'/':(ctx)=> TabScreen(),
             TabScreen.routeName:(ctx)=> TabScreen(),
-            LoginScreen.routeName:(ctx) => LoginScreen(),
-            SignupScreen.routeName:(ctx) => SignupScreen(),
-            FinanceScreen.routeName:(ctx) => FinanceScreen(),
+            //LoginScreen.routeName:(ctx) => LoginScreen(),
+            //SignupScreen.routeName:(ctx) => SignupScreen(),
+           // FinanceScreen.routeName:(ctx) => FinanceScreen(),
             CategoryTransaction.routeName:(ctx)=> CategoryTransaction(),
-            ResetScreen.routeName:(ctx) => ResetScreen(),
+            //ResetScreen.routeName:(ctx) => ResetScreen(),
           },
       ),
     );
@@ -159,7 +156,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     onPressed: () {
                       Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => SignInPage()));
+                        MaterialPageRoute(builder: (_) => LoginPage()));
                     },
                     color: primaryColor,
                     child:Text('LOGIN',
@@ -179,8 +176,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       borderRadius: BorderRadius.circular(30)
                     ),
                     onPressed: () {
-                      Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => SignUpView()));
+
                     },
                     color: primaryColor,
                     child:Text('SIGNUP',
@@ -196,7 +192,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   }
 }
-class AuthenticationWrapper extends StatelessWidget {
+/*class AuthenticationWrapper extends StatelessWidget {
   const AuthenticationWrapper({
     Key key,}): super(key:key);
 
@@ -204,12 +200,13 @@ class AuthenticationWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
   final firebaseUser=context.watch<User>();
     if(firebaseUser!=null){
+      //Navigator.pushAndRemoveUntil(context, newRoute, (route) => false)
       return TabScreen();
     }
     return MyHomePage(title:'FinanceWiz');
   }
-}
-
+}*/
+/**/
 /*
 class HomeController extends StatelessWidget {
   @override

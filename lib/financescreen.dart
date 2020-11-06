@@ -1,3 +1,4 @@
+/*
 import 'dart:io';
 import 'package:finance_manager/loginscreen.dart';
 import 'package:finance_manager/models/locator.dart';
@@ -66,15 +67,18 @@ class _FinanceScreenState extends State<FinanceScreen> with TickerProviderStateM
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              /*Text(
+                              */
+/*Text(
                                 "Available balance",
                                 style: TextStyle(
                                   fontSize: 18.0,
                                   fontWeight: FontWeight.w600,
                                   color: Colors.white,
                                 ),
-                              ),*/
-                          /*GestureDetector(
+                              ),*//*
+
+                          */
+/*GestureDetector(
                             onTap: (){
                                logout();
                             },
@@ -82,7 +86,8 @@ class _FinanceScreenState extends State<FinanceScreen> with TickerProviderStateM
                                    Icons.exit_to_app,
                                   color: Colors.white,
                                 ),
-                            ),*/
+                            ),*//*
+
                             ],
                           ),
                           SizedBox(
@@ -211,7 +216,8 @@ class _FinanceScreenState extends State<FinanceScreen> with TickerProviderStateM
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
+*/
+                         /*   children: [
                               buildActivityButton(Icons.card_membership, "My Card",
                                   Colors.blue.withOpacity(0.2), Color(0XFF01579B)),
                               buildActivityButton(
@@ -500,3 +506,4 @@ class _FinanceScreenState extends State<FinanceScreen> with TickerProviderStateM
       }
     }
   
+*/

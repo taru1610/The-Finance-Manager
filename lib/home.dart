@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:finance_manager/loginscreen.dart';
+import 'Piechart.dart';
 import 'package:finance_manager/models/locator.dart';
 import 'package:finance_manager/models/user.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +9,10 @@ import 'package:flutter_session/flutter_session.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:finance_manager/models/database.dart';
-import 'models/auth_repo.dart';
+
+import 'auth_provider.dart';
+import 'auth.dart';
+
 import 'profile_screen.dart';
 import 'package:intl/intl.dart';import 'models/preference.dart';
 import 'models/user_controller.dart';
@@ -25,12 +28,12 @@ class HomeScreen extends StatefulWidget{
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
 
-  void logout() async {
+ /* void logout() async {
     HelperFunctions.saveUserLoggedInSharedPreference(false);
     Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => LoginScreen()),
+        MaterialPageRoute(builder: (context) => ),
             (Route<dynamic> route) => false);
-  }
+  }*/
   /*dynamic title;
   void fetch() async {
     title = await FlutterSession().get("token").toString();}*/
@@ -40,13 +43,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
 // UserModel _currentUser = locator.get<UserController>().currentUser;
 
   File _image;
-
+  String name;
   final Color primaryColor = Color(0xff18203d);
   final Color secondaryColor = Color(0xFFB388FF);
   final Color logoGreen = Color(0xFF7C4DFF);
-  String name;
+  Future<String> uidfunction() async{
+      //String uid = await auth.
+    final BaseAuth auth = AuthProvider.of(context).auth;
+     //String uid= await context.read<AuthServuc>().getCurrentUID();
+    final uid = await auth.currentUser();
+    //print(uid);
+      DocumentSnapshot ds= await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      print('LALALALALALALAL');
+      name=ds.data()['name'];
+      return name;
+      //return name;//collection('userinfo').where('uid',isEqualTo: uid).snapshots();
+  }
   @override
   Widget build(BuildContext context) {
+    final BaseAuth auth = AuthProvider.of(context).auth;
 
 
 
@@ -92,44 +107,42 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
                               SizedBox(
                                 height: 10,
                               ),
-                              /*FutureBuilder(
-                                future: FlutterSession().get('token'),
-                                builder:(context,usertoken) {
-                                  print('WFTWFTWFTWFTWFWTFWTFWTW'+usertoken.data);
-                                  String title;
-                                DocumentReference docref= FirebaseFirestore.instance.collection('register').doc(usertoken.data.toString());
-                                docref.get().then((datasnapshot){
-                                  print(datasnapshot.data()['name'].toString());
-                                  return Text(datasnapshot.data()['name'].toString(),
-                                    style: TextStyle(
-                                        fontSize: 30,
-                                        fontWeight: FontWeight.w800,
-                                        color: Colors.white),
-                                    softWrap: true,);
-                                }
-                                  );
 
-                                print('wftfwtfwtfwtwftwfw '+title);*/
-                                 Text('Jennifer',
-        style: TextStyle(
-            fontSize: 30,
-            fontWeight: FontWeight.w800,
-            color: Colors.white),
-        softWrap: true,),
+                              FutureBuilder(
+    future: uidfunction(),
+    builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+      if (name != null) {
+        return Text(name,
+          style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.w800,
+              color: Colors.white),
+          softWrap: true,);
+      }
+      else{
+        return Text('user',
+          style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.w800,
+              color: Colors.white),
+          softWrap: true,);
+
+    }
+      }
+    ),
+
+                              
+                              
+/*
+                                 Text("",
+    style: TextStyle(
+    fontSize: 30,
+    fontWeight: FontWeight.w800,
+    color: Colors.white),
+    softWrap: true,),*/
 
 
 
-                                  //DocumentReference docref =Firestore.instance.collection('register').('email',isEqualTo: usertoken.data.toString());
-                                  //docref.get().then((datasnapshot) => name= datasnapshot.data()["name"].toString());
-                                  /*return Text(
-                                    'sample'
-                                  ,
-                                  style: TextStyle(
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white),
-                                  softWrap: true,);
-                                } ),*/
 
                             ],
                           ),
@@ -175,8 +188,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
 
                             Container(
                               height: 120,
-                              child: StreamBuilder( stream:FirebaseFirestore.instance.collection("Transaction").orderBy('date',descending:true).where(('date'),isLessThanOrEqualTo: new DateTime.now()).limit(10).snapshots(),
 
+                              child: StreamBuilder(
+    stream: getUserTransactions(context, auth),//stream:FirebaseFirestore.instance.collection("Transaction").orderBy('date',descending:true).where(('date'),isLessThanOrEqualTo: new DateTime.now()).limit(10).snapshots(),
+//stream:FirebaseFirestore.instance.collection('userdata').doc(uid).collection('transactions').orderBy('date',descending:true).where(('date'),isLessThanOrEqualTo: new DateTime.now()).limit(10).snapshots(),
     builder: (context,snapshot){
     if(snapshot.hasData){
     return ListView.builder(itemCount: snapshot.data.documents.length,
@@ -241,6 +256,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
                           SizedBox(
                             height: 20,
                           ),
+
                           buildCategoryCard(Icons.fastfood, "Food", 120, 20),
                           buildCategoryCard(Icons.flash_on, "Utilities", 430, 17),
                           buildCategoryCard(Icons.fastfood, "Food", 120, 20),
@@ -502,6 +518,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
         ),
       ),
     );
+
+
   }
+  
+
+  Stream<QuerySnapshot> getUserTransactions(BuildContext context,BaseAuth auth) async*{
+    //final uid= await context.read<Auth>()currentUser();
+    final uid = await auth.currentUser();
+    yield* FirebaseFirestore.instance.collection('userdata').doc(uid).collection('transactions').orderBy('date',descending:true).where(('date'),isLessThanOrEqualTo: new DateTime.now()).limit(10).snapshots();
+    //yield* Firestore.instance.collection('userdata').doc(uid).collection('transactions').where('category', isEqualTo:category).snapshots();
+  }
+
 }
 

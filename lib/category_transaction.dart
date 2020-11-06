@@ -4,13 +4,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:finance_manager/category_transaction_item.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import'auth_service.dart';
+import 'auth.dart';
 import 'package:provider/provider.dart';
 import 'models/preference.dart';
-import 'loginscreen.dart';
 import 'category_items.dart';
 import 'new_transaction.dart';
 import 'models/transaction.dart';
+import 'auth_provider.dart';
 class CategoryTransaction extends StatefulWidget {
 
 
@@ -24,7 +24,6 @@ class CategoryTransaction extends StatefulWidget {
 class _CategoryTransactionState extends State<CategoryTransaction> {
 
   @override
-
   void startAddNewTransaction( BuildContext ctx, String category){
     showModalBottomSheet(context: ctx, shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25.0))),
@@ -38,11 +37,15 @@ class _CategoryTransactionState extends State<CategoryTransaction> {
     });
   }
   final   List<String> Categories=['Food','Utilities','Taxes','Shopping','Healthcare','Misc','Transport','Rent/Loan', 'Personal Payments'];
-
+  void logout() async {
+    context.read<Auth>().signOut();
+  }
 
   @override
   Widget build(BuildContext context) {
-     final routeargs = ModalRoute
+    final BaseAuth auth = AuthProvider.of(context).auth;
+
+    final routeargs = ModalRoute
          .of(context)
          .settings
          .arguments as Map<String, String>;
@@ -54,7 +57,7 @@ class _CategoryTransactionState extends State<CategoryTransaction> {
        appBar: AppBar(title: Text(title)
          , actions:<Widget>[
            IconButton(icon: Icon(Icons.exit_to_app), onPressed: (){
-             context.read<AuthService>().signOut();
+             logout();
            })
          ],
        ),
@@ -114,7 +117,7 @@ class _CategoryTransactionState extends State<CategoryTransaction> {
                            height:300,
 
 
-                                child:  StreamBuilder( stream: getUserTransactions(context, title.toString()),
+                                child:  StreamBuilder( stream: getUserTransactions(context, title.toString(), auth),
                                 /*FirebaseFirestore.instance.collection('userdata').doc(uid).collection('transactions').orderBy('date',descending: true).where('category',isEqualTo:title.toString()).snapshots(),*/
 
     builder: (context,snapshot){
@@ -224,8 +227,9 @@ class _CategoryTransactionState extends State<CategoryTransaction> {
 
 
   }
-  Stream<QuerySnapshot> getUserTransactions(BuildContext context, String title) async*{
-    final uid= await context.read<AuthService>().getCurrentUID();
+  Stream<QuerySnapshot> getUserTransactions(BuildContext context, String title, BaseAuth auth) async*{
+    //final uid= await context.read<Auth>()currentUser();
+    final uid = await auth.currentUser();
     yield* Firestore.instance.collection('userdata').doc(uid).collection('transactions').where('category', isEqualTo:title).snapshots();
   }
 }

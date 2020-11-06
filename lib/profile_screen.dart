@@ -1,27 +1,53 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'loginscreen.dart';
+import 'auth.dart';
+import 'auth_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+
+import 'package:provider/provider.dart';
 
 import 'models/preference.dart';
 class UserScreen extends StatefulWidget {
+  UserScreen({this.onSignedOut});
+  final VoidCallback onSignedOut;
   @override
-  _UserScreenState createState() => _UserScreenState();
+  _UserScreenState createState() => _UserScreenState(onSignedOut);
 }
 
 class _UserScreenState extends State<UserScreen> {
-  void logout() async {
-    HelperFunctions.saveUserLoggedInSharedPreference(false);
-    Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => LoginScreen()),
-            (Route<dynamic> route) => false);}
+  final VoidCallback onSignedOut;
+  _UserScreenState(this.onSignedOut);
 
+  Future<void> _signOut(BuildContext context) async {
+    try {
+      final BaseAuth auth = AuthProvider.of(context).auth;
+      await auth.signOut();
+      onSignedOut();
+    } catch (e) {
+      print(e);
+    }
+  }
+  String name;
+  Future<String> uidfunction() async{
+    //String uid = await auth.
+    final BaseAuth auth = AuthProvider.of(context).auth;
+    //String uid= await context.read<AuthServuc>().getCurrentUID();
+    final uid = await auth.currentUser();
+    //print(uid);
+    DocumentSnapshot ds= await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    print('LALALALALALALAL');
+    name=ds.data()['name'];
+    return name;
+    //return name;//collection('userinfo').where('uid',isEqualTo: uid).snapshots();
+  }
   Widget build(BuildContext context) {
     return
       Scaffold(
         appBar:  AppBar(title: Text('Profile')
           , actions:<Widget>[
             IconButton(icon: Icon(Icons.exit_to_app), onPressed: (){
-              logout();
+              _signOut(context);
             })
           ],
         ),

@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' ;
 import 'package:flutter_session/flutter_session.dart';
 import 'package:provider/provider.dart';
-import 'auth_service.dart';
-
-import 'auth_service.dart';
-
+import 'auth_provider.dart';
+import 'auth.dart';
 
 class NewTransaction extends StatefulWidget {
   final String category;
@@ -27,6 +25,8 @@ class _NewTransactionState extends State<NewTransaction> {
   @override
 
   Widget build(BuildContext context) {
+    final BaseAuth auth = AuthProvider.of(context).auth;
+
     /*FutureBuilder(future: FlutterSession().get('token'),
     builder:(context,token) {
       userid= token.data.toString();
@@ -73,8 +73,9 @@ class _NewTransactionState extends State<NewTransaction> {
                     minWidth: double.maxFinite,
                     height: 50,
                   onPressed:() async{
-                      final uid= await context.read<AuthService>().getCurrentUID();
-
+                    final uid= await auth.currentUser();//context.read<AuthService>().getCurrentUID();
+                      /*DocumentSnapshot ds= await FirebaseFirestore.instance.collection('userdata').doc(uid).collection('amounts').doc(widget.category).get();
+                      int initial= ds.data()['amount'];*/
                       Map <String, dynamic> transaction ={
                         "title":titleController.text,
                         "amount":amountController.text,
@@ -83,7 +84,14 @@ class _NewTransactionState extends State<NewTransaction> {
                         "date": DateTime.now(),
                         //"user":userid,
                       };
-                      await db.collection('userdata').doc(uid).collection('transactions').add(transaction);
+                     /* int amount =int.parse(amountController.text);
+                      Map<String,dynamic> categories={
+                        "amount":amount+initial
+                      };*/
+                      print(uid);
+                      await db.collection('userdata').doc(uid).collection(widget.category+'transactions').add(transaction);
+                     /* await db.collection('userdata').doc(uid).collection('amounts').doc(widget.category).update(categories);*/
+                      //await db.collection('userdata').doc(uid).collection('total').add(transaction);
                       //documentReference.set(transaction).whenComplete(() => print("created"));
                   //widget.addTX(titleController.text, double.parse(amountController.text));
                   Navigator.of(context).pop();
